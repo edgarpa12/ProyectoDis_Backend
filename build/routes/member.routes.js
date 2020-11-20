@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var express_1 = require("express");
+var generalController_1 = require("../controllers/generalController");
+var generalController = generalController_1.GeneralController.getInstance();
+var routerMember = express_1.Router();
+routerMember.get('/getMembers', generalController.getMembers);
+routerMember.post('/getMember', generalController.getMember);
+routerMember.post('/create', generalController.createMember);
+routerMember.post('/changeGroup', generalController.changeGroup);
+routerMember.put('/update', generalController.updateMember);
+routerMember.delete('/delete', generalController.deleteMember);
+routerMember.get('/getMonitors', generalController.getMonitors);
+routerMember.get('/getStructuresXMember', generalController.getStructuresXMember);
+exports.default = routerMember;
