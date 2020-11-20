@@ -7,6 +7,7 @@ export default {
   PORT: process.env.PORT || '3000',
 
   DB_DIALECT: process.env.DB_DIALECT || 'mongo',
-  DB_HOST: process.env.DB_HOST || 'mongodb+srv://userDB:proyecto@cluster0.qsnbz.mongodb.net/main?retryWrites=true&w=majority',
+  DB_HOST: process.env.DB_HOST || 'toDo',
+  //DB_HOST: process.env.DB_HOST || 'mongodb+srv://userDB:proyecto@cluster0.qsnbz.mongodb.net/main?retryWrites=true&w=majority',
   DB_NAME: process.env.DB_NAME || 'main'
 };
