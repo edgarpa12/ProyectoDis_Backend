@@ -1,17 +1,16 @@
+import { PROXY_AUTHENTICATION_REQUIRED } from "http-status";
 import { AbstractComponent } from "../Models/abstractComponent";
 import { CompositeStructure } from "../Models/structureComposite";
 import { DatabaseManager } from "./databaseManager";
+import { Proxy } from "./proxy";
 
 export class StructureManager {
-  //STRUCTURE MANAGER Attributes
-  structures: CompositeStructure[] = [];
-  databaseManager: DatabaseManager = new DatabaseManager();
 
   //El structure manager lleva el id de la organizacion para actualizar la info en memoria por cada llamada a base de datos
   // idOrganization: String = "";
 
   public getStructures() {
-    return this.structures;
+    return Proxy.getInstance().getStructures();
   }
 
   // public setIdOrganization(id: String) {
@@ -127,7 +126,7 @@ export class StructureManager {
 
   public async removeMemberFromStructure(pIdMember: String, pIdGroup: String) {
     let search = { members: pIdMember };
-    const message = this.databaseManager.removeToGroup(search, pIdGroup);
+    const message = Proxy.getInstance().removeFromGroup(search, pIdGroup);
     // this.loadStructures(this.idOrganization);
     return message;
   }
@@ -139,8 +138,8 @@ export class StructureManager {
   ) {
     let searchB = { bosses: pIdMember };
     let searchM = { members: pIdMember };
-    const messageB = await this.databaseManager.removeToGroup(searchB, pIdGroup);
-    const messageM = await this.databaseManager.removeToGroup(searchM, pIdBranch);
+    const messageB = await Proxy.getInstance().removeFromGroup(searchB, pIdGroup);
+    const messageM = await Proxy.getInstance().removeFromGroup(searchM, pIdBranch);
     // await this.loadStructures(this.idOrganization);
     return messageM;
   }
@@ -155,7 +154,7 @@ export class StructureManager {
     if (structure.bosses.length >= 2) {
       return { message: "Max of bosses is 2" };
     }
-    const message = this.databaseManager.addBossToGroup(
+    const message = Proxy.getInstance().addBossToGroup(
       pIdMember,
       structure.id
     );

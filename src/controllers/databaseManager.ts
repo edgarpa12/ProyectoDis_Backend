@@ -251,7 +251,7 @@ export class DatabaseManager {
     return { message: "Usuario Añadido" };
   }
 
-  async removeToGroup(pSearch: Object, pIdStructure: String) {
+  async removeFromGroup(pSearch: Object, pIdStructure: String) {
     const deleted = await structureS.findByIdAndUpdate(
       pIdStructure,
       { $pull: pSearch }
