@@ -1,7 +1,7 @@
 
 import { AbstractComponent } from "./abstractComponent";
 import { Status } from "./status";
-
+import { NewsHistory} from "./newsHistory";
 export class Member extends AbstractComponent {
   phone: String;
   email: String;
@@ -10,6 +10,7 @@ export class Member extends AbstractComponent {
   dateEnd: Date;
   status: Status;
   monitor: boolean;
+  news: NewsHistory;
   
   constructor(
     pId: String,
@@ -21,7 +22,7 @@ export class Member extends AbstractComponent {
     pDateEnd: Date= new Date(),
     pMonitor: boolean = false,
     pStatus: Status= Status.ACTIVE,    
-
+    pNewsHistory: NewsHistory = new NewsHistory()
   ) {
     super(pId, pName);
     this.phone = pPhone;
@@ -31,6 +32,7 @@ export class Member extends AbstractComponent {
     this.dateEnd = pDateEnd;
     this.monitor = pMonitor;
     this.status = pStatus;
+    this.news = pNewsHistory;
   }
 
   getMember(): AbstractComponent[]{

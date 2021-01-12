@@ -235,6 +235,7 @@ export class Organization {
     );
     return structuresXMember;
   }
+  
   public async getDefaultBranches() {
     this.branches = await this.databaseM.loadDefaultBranches(this.id);
     return this.branches;

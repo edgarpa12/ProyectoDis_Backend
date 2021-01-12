@@ -2,7 +2,7 @@
 import mongoose from 'mongoose';
 import CONFIG from './config';
 
-mongoose.Promise = global.Promise;
+(<any>mongoose).Promise = global.Promise;
 mongoose
   .connect(CONFIG.DB_HOST, {
     useNewUrlParser: true,

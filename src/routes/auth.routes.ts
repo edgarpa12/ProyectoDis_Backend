@@ -7,4 +7,5 @@ routerAuth.post("/signin", generalController.signIn);
 routerAuth.post("/signup", generalController.signUp);
 
 routerAuth.get("/signout", generalController.signOut);
+
 export default routerAuth;

@@ -102,7 +102,6 @@ export class DatabaseManager {
     return branches;
   }
 
-
   async getListStructure(data: Document[], pIdOrganization: String, pMemoryMembers: Member[]): Promise<CompositeStructure[]> {
     const structures: CompositeStructure[] = [];
     if (data != null || data != []) {
@@ -177,7 +176,7 @@ export class DatabaseManager {
   async deleteStructure(pIdParent: String) {
     const data = await this.getStructures(pIdParent);
     if (data != []) {
-      data.forEach((structure) => {
+      data.forEach((structure: any) => {
         return this.deleteStructure(structure._id);
       });
     }
@@ -189,7 +188,7 @@ export class DatabaseManager {
   async removeBoss(pIdMember: String, pIdParent: String) {
     const structures = await this.getStructures(pIdParent);
     if (structures != []) {
-      structures.forEach((structure) => {
+      structures.forEach((structure: any) => {
         return this.deleteStructure(structure._id);
       });
     }
@@ -321,7 +320,6 @@ export class DatabaseManager {
 
 
   // Organization 
-
   async validateOrganization(
     pEmail: String,
     pPassword: String

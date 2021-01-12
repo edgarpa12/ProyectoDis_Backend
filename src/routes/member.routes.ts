@@ -1,23 +1,29 @@
 import { Router } from 'express';
-import { GeneralController } from '../controllers/generalController';
-const generalController = GeneralController.getInstance();
+import { FacadeAsesor } from '../controllers/facadeAsesor';
+import { FacadeJefe } from '../controllers/facadeJefe';
+import { FacadeMiembros } from '../controllers/facadeMiembros';
+
+const facadeAsesor = new FacadeAsesor();
+const facadeJefe = new FacadeJefe();
+const facadeMiembros = new FacadeMiembros();
+
 const routerMember = Router();
 
 
-routerMember.get('/getMembers', generalController.getMembers);
+routerMember.get('/getMembers', facadeMiembros.getMembers);
 
-routerMember.post('/getMember', generalController.getMember);
+routerMember.post('/getMember', facadeMiembros.getMember);
 
-routerMember.post('/create', generalController.createMember);
+routerMember.post('/create', facadeAsesor.createMember);
 
-routerMember.post('/changeGroup', generalController.changeGroup);
+routerMember.post('/changeGroup', facadeAsesor.changeGroup);
 
-routerMember.put('/update', generalController.updateMember);
+routerMember.put('/update', facadeAsesor.updateMember);
 
-routerMember.post('/delete', generalController.deleteMember);
+routerMember.post('/delete', facadeAsesor.deleteMember);
 
-routerMember.get('/getMonitors', generalController.getMonitors);
+routerMember.get('/getMonitors', facadeAsesor.getMonitors);
 
-routerMember.get('/getStructuresXMember', generalController.getStructuresXMember);
+routerMember.get('/getStructuresXMember', facadeMiembros.getStructuresXMember);
 
 export default routerMember;
