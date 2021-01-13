@@ -17,7 +17,7 @@ export class FacadeMiembros {
   }
 
   public async getMember(req: Request, res: Response) {
-    const { idUser } = req.body;
+    const {idUser} = req.body;
     try {
       const response = await GeneralController.getInstance().getMember(idUser);
       return res.json(response);
@@ -35,7 +35,9 @@ export class FacadeMiembros {
       const ids = req.body.ids;
       const response = await GeneralController.getInstance().getStructureBosses(ids);
       return res.json(response);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   public async getStructureMembers(req: Request, res: Response) {
@@ -43,17 +45,40 @@ export class FacadeMiembros {
       const ids = req.body.ids;
       const response = await GeneralController.getInstance().getStructureMembers(ids);
       return res.json(response);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   public async getStructuresXMember(req: Request, res: Response) {
     try {
-      const { idUser } = req.body;
+      const {idUser} = req.body;
       const response = await GeneralController.getInstance().getStructuresXMember(
         idUser
       );
       return res.json(response);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   }
 
+  public async sendCCG(req: Request, res: Response) {
+    try {
+      const {from, body, type} = req.body;
+      const response = await GeneralController.getInstance().sendCCG(from, body, type);
+      return res.json(response);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  public async sendNews(req: Request, res: Response) {
+    try {
+      const {from, to, body, images} = req.body;
+      const response = await GeneralController.getInstance().sendNews(from, to, body, images);
+      return res.json(response);
+    } catch (err) {
+      console.error(err);
+    }
+  }
 }

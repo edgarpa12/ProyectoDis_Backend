@@ -1,5 +1,11 @@
 import { Request, Response } from "express";
 import { Organization } from "./organization";
+import { CCG } from "../models/CCG";
+import GratitudeStrategy from "./GratitudeStrategy";
+import OfferingStrategy from "./OfferingStrategy";
+import PetitionStrategy from "./PetitionStrategy";
+import { News } from "../models/news";
+import { AbstractComponent } from "../models/abstractComponent";
 
 export class GeneralController {
   private static instance: GeneralController;
@@ -17,7 +23,7 @@ export class GeneralController {
       return await Organization.getInstance().getMembers();
     } catch (err) {
       console.error(err);
-    };
+    }
   }
 
   // Recibe id del miembro a buscar
@@ -26,7 +32,7 @@ export class GeneralController {
       return await Organization.getInstance().readMember(idUser);
     } catch (err) {
       console.error(err);
-    };
+    }
   }
 
   public async createMember(name: String, phone: String, email: String, direction: String) {
@@ -36,7 +42,6 @@ export class GeneralController {
       email,
       direction
     );
-
   }
 
   public async updateMember(id: String, newData: Object) {
@@ -48,11 +53,11 @@ export class GeneralController {
       return await Organization.getInstance().deleteMember(id);
     } catch (err) {
       console.error(err);
-    };
+    }
   }
 
   public async changeGroup(idUser: String, idOldGroup: String,
-    ids: String[]) {
+                           ids: String[]) {
     return await Organization.getInstance().changeGroup(
       idUser,
       idOldGroup,
@@ -243,6 +248,18 @@ export class GeneralController {
   }
 
   public async deleteOrganization(idOrganization: String) {
-      return await Organization.getInstance().deleteOrganization(idOrganization);
+    return await Organization.getInstance().deleteOrganization(idOrganization);
+  }
+
+  // from: idMember
+  public async sendCCG(from: String, body: String, type: String,) {
+    const ccg = new CCG(from, body, type);
+    return await Organization.getInstance().sendCCG(ccg, type);
+  }
+
+  // from: idMember, to: idStructure
+  public async sendNews(from: String, to: String, body: String, images: String[]) {
+    const news = new News(from, to, body, images);
+    return await Organization.getInstance().sendNews(news);
   }
 }

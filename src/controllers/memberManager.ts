@@ -1,20 +1,12 @@
 import { Member } from "../Models/member";
-import { DatabaseManager } from "../controllers/databaseManager";
 import { ICRUD } from "./ICRUD";
+import { Proxy } from "./proxy";
+
 export class MemberManager implements ICRUD {
-  members: Member[] = [];
-  databaseManager: DatabaseManager = new DatabaseManager();
 
   // Recibe Nombre, Telefono,Email,Direccion, ids
   public async create(...args: any[]) {
-    const response = await this.databaseManager.createMember(
-      args[0],
-      args[1],
-      args[2],
-      args[3],
-      args[4]
-    );
-    return response;
+    return await Proxy.getInstance().createMember(args);
   }
 
   public async read(...args: any[]) {
@@ -25,26 +17,24 @@ export class MemberManager implements ICRUD {
   }
 
   public async update(...args: any[]) {
-    let message = this.databaseManager.updateMember(args[0], args[1]);
-    return message;
+    return await Proxy.getInstance().updateMember(args);
   }
 
   public async delete(...args: any[]) {
-    const message = this.databaseManager.deleteMember(args[0]);
-    return message;
+    return await Proxy.getInstance().deleteMember(args);
   }
 
   public getMembers() {
-    return this.members;
+    return Proxy.getInstance().getMembers();
   }
 
-  public async loadMembers(pIdOrganization:String) {
-    this.members = await this.databaseManager.loadMembers(pIdOrganization);
+  public async loadMembers(pIdOrganization: String) {
+    await Proxy.getInstance().loadMembers(pIdOrganization);
   }
 
   public async getMonitors() {
     let monitors: Member[] = [];
-    this.members.forEach((member) => {
+    this.getMembers().forEach((member) => {
       if (member.monitor) {
         monitors.push(member);
       }

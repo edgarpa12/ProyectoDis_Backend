@@ -26,4 +26,10 @@ routerMember.get('/getMonitors', facadeAsesor.getMonitors);
 
 routerMember.get('/getStructuresXMember', facadeMiembros.getStructuresXMember);
 
+routerMember.post('/uploadTest', function (req, res) {
+  console.log(req.files);
+  console.log(req.body);
+  res.send("Hola");
+});
+
 export default routerMember;

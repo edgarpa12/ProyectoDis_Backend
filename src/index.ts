@@ -5,6 +5,6 @@ import './config/db';
 const { PORT } = CONFIG;
 
 app.listen(PORT, () => {
-    console.log(PORT)
-    return console.log(`Server is listening on ${PORT}`);
-  });
+  console.log(PORT)
+  return console.log(`Server is listening on ${ PORT }`);
+});

@@ -4,20 +4,26 @@ import {
   memberS,
   structureS,
   organizationS,
-  BranchSchema,
-  branchSchema,
+  branchS,
+  ccgS,
+  newsS,
+  newsHistoryS
 } from "../Models/Schemas";
 import { Document } from "mongoose";
-import { publicDecrypt } from "crypto";
+import { CCG } from "../models/CCG";
+import { News } from "../models/news";
+import { AbstractComponent } from "../models/abstractComponent";
+import { Organization } from "./organization";
 
 export class DatabaseManager {
   //DATABASE -> MEMORY MEMBERS
   //DB MANAGER: Cargar Miembros a memoria
   async loadMembers(pIdOrganization: String): Promise<Member[]> {
-    let membersFromDB = await memberS.find({ "idOrganization": pIdOrganization });
+    let membersFromDB = await memberS.find({"idOrganization": pIdOrganization});
     let members: Member[] = await this.getListMembers(membersFromDB);
     return members;
   }
+
   //DB MANAGER: Tranforma los documentos de la BD a objetos MIEMBROS
   async getListMembers(documents: Document[]) {
     let members: Member[] = [];
@@ -61,7 +67,7 @@ export class DatabaseManager {
     pEmail: String,
     pDirection: String
   ) {
-    let persistantMember = new memberS({
+    const persistantMember = new memberS({
       name: pName,
       idOrganization: pIdOrganization,
       phone: pPhone,
@@ -94,7 +100,7 @@ export class DatabaseManager {
   }
 
   async loadBranches(pIdOrganization: String): Promise<String[]> {
-    let branchesFromDB = await BranchSchema.find({ "idOrganization": pIdOrganization });
+    let branchesFromDB = await branchS.find({"idOrganization": pIdOrganization});
     let branches: String[] = [];
     for (const branch of branchesFromDB) {
       branches.push(branch.get('name'))
@@ -123,12 +129,13 @@ export class DatabaseManager {
     }
     return structures;
   }
+
   //END DATABASE -> MEMORY
 
   //DB MANAGER: STRUCTURES METHODS
   //DB MANAGER: CREA una structure en la  base de datos
   async createStructure(pName: String, pParent: String, pGroupNumber: String) {
-    let searchedStrucutre = await structureS.find({ name: pName, parent: pParent });
+    let searchedStrucutre = await structureS.find({name: pName, parent: pParent});
     //Valida si no existe una estructura con ese nombre
     if (searchedStrucutre.length == 0) {
       let persistantStructure = new structureS({
@@ -139,7 +146,7 @@ export class DatabaseManager {
       const responseDB = await persistantStructure.save();
       return responseDB;
     }
-    return { message: "Already exists a structure with this name: " + pName };
+    return {message: "Already exists a structure with this name: " + pName};
   }
 
   //DB MANAGER: OBTIENE una structure en la  base de datos
@@ -153,13 +160,13 @@ export class DatabaseManager {
 
   //DB MANAGER: OBTIENE una structure en la  base de datos
   async getStructures(pParent: String) {
-    let structures = await structureS.find({ parent: pParent });
+    let structures = await structureS.find({parent: pParent});
     return structures;
   }
 
   //DB MANAGER: MODIFICA una structure en la  base de datos
   async updateStructure(pId: String, pNewName: String) {
-    let searchedStructure = structureS.find({ name: pNewName });
+    let searchedStructure = structureS.find({name: pNewName});
     //Valida si no existe una estructura con ese nombre
     if ((await searchedStructure).length == 0) {
       const responseDB = await structureS.findByIdAndUpdate(pId, {
@@ -195,7 +202,7 @@ export class DatabaseManager {
   }
 
   async loadDefaultBranches(pIdOrganization: String) {
-    const branches = await BranchSchema.find({
+    const branches = await branchS.find({
       idOrganization: pIdOrganization
     })
     let defaultBranches: String[] = [];
@@ -207,7 +214,7 @@ export class DatabaseManager {
 
   //DB MANAGER: Devuelve los hijos de una estructura padre
   async findLevel(pIdParent: String) {
-    const data = await structureS.find({ parent: pIdParent });
+    const data = await structureS.find({parent: pIdParent});
     return data;
   }
 
@@ -246,26 +253,26 @@ export class DatabaseManager {
   //OTHER FUNCTIONS
   async addMemberToGroup(pIdMember: String, pIdStructure: String) {
     const message = await structureS.findByIdAndUpdate(pIdStructure, {
-      $push: { members: pIdMember },
+      $push: {members: pIdMember},
     });
-    return { message: "Usuario Añadido" };
+    return {message: "Usuario Añadido"};
   }
 
   async removeFromGroup(pSearch: Object, pIdStructure: String) {
     const deleted = await structureS.findByIdAndUpdate(
       pIdStructure,
-      { $pull: pSearch }
+      {$pull: pSearch}
     );
-    return { message: "Usuario Eliminado" };
+    return {message: "Usuario Eliminado"};
   }
 
   async addBossToGroup(pIdMember: String, pIdStructure: String) {
     //Validar no más de dos
     const message = await structureS.updateOne(
-      { _id: pIdStructure },
-      { $push: { bosses: pIdMember } }
+      {_id: pIdStructure},
+      {$push: {bosses: pIdMember}}
     );
-    let struct = await structureS.findOne({ _id: pIdStructure });
+    let struct = await structureS.findOne({_id: pIdStructure});
     const idParent = struct?.toJSON().parent;
     this.addMemberToGroup(pIdMember, idParent);
     return message;
@@ -273,13 +280,13 @@ export class DatabaseManager {
 
   //Catalogo
   async addDefaultBranch(pIdOrganization: String, pName: String) {
-    let searchedBranch = BranchSchema.find({
+    let searchedBranch = branchS.find({
       idOrganization: pIdOrganization,
       name: pName,
     });
     //Valida si no existe una estructura con ese nombre
     if ((await searchedBranch).length == 0) {
-      const persistantDefaultBranch = new BranchSchema({
+      const persistantDefaultBranch = new branchS({
         idOrganization: pIdOrganization,
         name: pName,
       });
@@ -292,18 +299,17 @@ export class DatabaseManager {
   }
 
   async updateDefaultBranch(pIdOrganization: String, pOldName: String, pName: String) {
-    let searchedBranch = BranchSchema.find({
+    let searchedBranch = branchS.find({
       idOrganization: pIdOrganization,
       name: pName,
     });
     //Valida si no existe una estructura con ese nombre
     if ((await searchedBranch).length == 0) {
-      const persistantDefaultBranch = await BranchSchema.update(
-        { idOrganization: pIdOrganization, name: pOldName },
-        { name: pName }
+      const persistantDefaultBranch = await branchS.update(
+        {idOrganization: pIdOrganization, name: pOldName},
+        {name: pName}
       );
-      const message = persistantDefaultBranch;
-      return message;
+      return persistantDefaultBranch;
     }
     return {
       message: "Already exists a structure with this name: " + pName,
@@ -311,7 +317,7 @@ export class DatabaseManager {
   }
 
   async deleteDefaultBranch(pIdOrganization: String, pName: String) {
-    const message = await BranchSchema.findOneAndDelete({
+    const message = await branchS.findOneAndDelete({
       idOrganization: pIdOrganization,
       name: pName,
     });
@@ -319,7 +325,7 @@ export class DatabaseManager {
   }
 
 
-  // Organization 
+  // Organization
   async validateOrganization(
     pEmail: String,
     pPassword: String
@@ -330,7 +336,7 @@ export class DatabaseManager {
       password: pPassword,
     });
     if (organization != null) {
-      const persistantBranches = await BranchSchema.find({
+      const persistantBranches = await branchS.find({
         idOrganization: organization._id,
       });
       let branches: (String | String[])[] = [];
@@ -356,12 +362,30 @@ export class DatabaseManager {
   }
 
   async updateOrganization(pIdOrganization: String, pNewData: Object) {
-    const message = await organizationS.findByIdAndUpdate(pIdOrganization, pNewData);
-    return message;
+    return organizationS.findByIdAndUpdate(pIdOrganization, pNewData);
   }
 
   async removeOrganization(pIdOrganization: String) {
-    const message = await organizationS.findOneAndDelete(pIdOrganization);
-    return message;
+    return organizationS.findOneAndDelete(pIdOrganization);
+  }
+
+  async saveCCG(pCcg: CCG) {
+    const persistantCCG = new ccgS({
+      idOrganization: Organization.getInstance().id,
+      from: pCcg.from,
+      body: pCcg.body,
+      type: pCcg.type
+    });
+    return await persistantCCG.save();
+  }
+
+  async saveNews(pNews: News, component: AbstractComponent) {
+    const persistantNews = new newsS({
+      from: pNews.from,
+      to: component,
+      body: pNews.body,
+      images: pNews.images
+    });
+    return await persistantNews.save();
   }
 }

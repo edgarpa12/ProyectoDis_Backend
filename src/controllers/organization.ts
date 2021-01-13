@@ -1,6 +1,9 @@
 import { StructureManager } from "./structureManager";
 import { MemberManager } from "./memberManager";
 import { DatabaseManager } from "./databaseManager";
+import { CCG } from "../models/CCG";
+import { News } from "../models/news";
+import { AbstractComponent } from "../models/abstractComponent";
 
 export class Organization {
   private static instance: Organization;
@@ -18,6 +21,7 @@ export class Organization {
   memberM: MemberManager;
   databaseM: DatabaseManager;
   branches: String[];
+
   private constructor(
     pId: String = "",
     pName: String = "",
@@ -61,6 +65,7 @@ export class Organization {
   public async deleteOrganization(pIdOrganization: String) {
     return await this.databaseM.removeOrganization(pIdOrganization);
   }
+
   //Member Methods
 
   // CRUD Members
@@ -235,7 +240,7 @@ export class Organization {
     );
     return structuresXMember;
   }
-  
+
   public async getDefaultBranches() {
     this.branches = await this.databaseM.loadDefaultBranches(this.id);
     return this.branches;
@@ -289,6 +294,7 @@ export class Organization {
     const added = await this.addBossToGroup(pIdMember, pIds);
     return added;
   }
+
   //CATALOGO
 
   public async addDefaultBranch(pIdOrganization: String, pName: String) {
@@ -319,5 +325,13 @@ export class Organization {
 
   public async getDefaultBranch() {
     return this.branches;
+  }
+
+  public async sendCCG(ccg: CCG, type: String) {
+    await this.structureM.sendCCG(ccg, type);
+  }
+
+  public async sendNews(news: News) {
+    await this.structureM.sendNews(news);
   }
 }

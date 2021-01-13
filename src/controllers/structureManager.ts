@@ -3,6 +3,13 @@ import { AbstractComponent } from "../Models/abstractComponent";
 import { CompositeStructure } from "../Models/structureComposite";
 import { DatabaseManager } from "./databaseManager";
 import { Proxy } from "./proxy";
+import { CCG } from "../models/CCG";
+import Publisher from "./publisher";
+import CCGSender from "./CCGSender";
+import GratitudeStrategy from "./GratitudeStrategy";
+import OfferingStrategy from "./OfferingStrategy";
+import PetitionStrategy from "./PetitionStrategy";
+import { News } from "../models/news";
 
 export class StructureManager {
 
@@ -65,26 +72,23 @@ export class StructureManager {
 
   // BASE DE DATOS
   public async loadStructures(pParent: String) {
-    this.structures = await this.databaseManager.loadStructures(pParent, pParent);
+    return await Proxy.getInstance().loadStructures(pParent);
   }
 
   public async create(...args: any[]) {
-    const message = await this.databaseManager.createStructure(args[0], args[1], args[2]);
-    return message;
+    return await Proxy.getInstance().createStructure(args);
   }
 
   public async update(...args: any[]) {
-    const message = this.databaseManager.updateStructure(args[0], args[1]);
-    return message;
+    return await Proxy.getInstance().updateStructure(args);
   }
 
   public async delete(...args: any[]) {
-    const message = this.databaseManager.deleteStructure(args[0]);
-    return message;
+    return await Proxy.getInstance().deleteStructure(args);
   }
 
   public async findLevel(...args: any[]) {
-    return this.databaseManager.findLevel(args[0]);
+    return Proxy.getInstance().findLevel(args);
   }
 
   //STRUCTURE MANAGER: MEMORIA
@@ -120,7 +124,7 @@ export class StructureManager {
         return { message: "This user is already a member in this structure" };
       }
     }
-    const message = await this.databaseManager.addMemberToGroup(pIdMember, group.id);
+    const message = await Proxy.getInstance().addMemberToGroup(pIdMember, group.id);
     return message;
   }
 
@@ -176,5 +180,28 @@ export class StructureManager {
       }
     }
     return structures;
+  }
+
+  private publisher: Publisher = new Publisher();
+  private ccgSender: CCGSender = new CCGSender();
+
+  public async sendCCG(ccg: CCG, type: String) {
+    switch (type) {
+      case "Gratitude":
+        this.ccgSender.setStrategy(new GratitudeStrategy);
+        break;
+      case "Offering":
+        this.ccgSender.setStrategy(new OfferingStrategy);
+        break;
+      case "Petition":
+        this.ccgSender.setStrategy(new PetitionStrategy);
+        break;
+    }
+
+    await this.ccgSender.sendCCG(ccg);
+  }
+
+  public async sendNews(news: News) {
+    this.publisher.post(news);
   }
 }
