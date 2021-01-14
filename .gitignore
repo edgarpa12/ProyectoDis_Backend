@@ -1,4 +1,5 @@
 .idea/
+static/uploads/*
 # Logs
 logs
 *.log

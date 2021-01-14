@@ -2,6 +2,9 @@ import { Router } from 'express';
 import { FacadeAsesor } from '../controllers/facadeAsesor';
 import { FacadeJefe } from '../controllers/facadeJefe';
 import { FacadeMiembros } from '../controllers/facadeMiembros';
+import multer from "multer";
+import path from "path";
+import { saveImages } from "./helpers";
 
 const facadeAsesor = new FacadeAsesor();
 const facadeJefe = new FacadeJefe();
@@ -26,10 +29,6 @@ routerMember.get('/getMonitors', facadeAsesor.getMonitors);
 
 routerMember.get('/getStructuresXMember', facadeMiembros.getStructuresXMember);
 
-routerMember.post('/uploadTest', function (req, res) {
-  console.log(req.files);
-  console.log(req.body);
-  res.send("Hola");
-});
+routerMember.post('/uploadTest', saveImages);
 
 export default routerMember;

@@ -7,7 +7,7 @@ import { DBInterface } from "./DBInterface";
 export class Proxy implements DBInterface {
   // Singleton
   private static instance: Proxy;
-  
+
   public static getInstance() {
     if (this.instance === null)
       this.instance = new Proxy();
@@ -58,7 +58,7 @@ export class Proxy implements DBInterface {
   }
 
   //////////// Members ////////////
-  
+
   members: Member[] = [];
 
   public async createMember(...args: any[]) {
@@ -85,7 +85,11 @@ export class Proxy implements DBInterface {
     return this.members;
   }
 
-  public async loadMembers(pIdOrganization:String) {
+  public async loadMembers(pIdOrganization: String) {
     this.members = await this.databaseManager.loadMembers(pIdOrganization);
+  }
+
+  async seenNews(pIdMember: String, pSeenNews: [String]) {
+    await this.databaseManager.seenNews(pIdMember, pSeenNews);
   }
 }

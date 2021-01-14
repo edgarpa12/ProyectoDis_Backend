@@ -388,4 +388,24 @@ export class DatabaseManager {
     });
     return await persistantNews.save();
   }
+
+
+  async seenNews(pIdMember: String, pNews: [String]) {
+    let searchedMember = newsHistoryS.find({ member: pIdMember });
+    //Valida si no existe una estructura con ese nombre
+    if ((await searchedMember).length == 0) {
+      const persistantNewsHistory = new newsHistoryS({
+        member: pIdMember,
+        seenNews: pNews
+      });
+      return await persistantNewsHistory.save();
+      }else {
+      const message = newsHistoryS.updateOne(
+        {member: pIdMember,},
+        {$push: { seenNews: pNews },
+      });
+      return await message.save();
+    }
+  }
+
 }
