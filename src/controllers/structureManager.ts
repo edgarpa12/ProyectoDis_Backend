@@ -204,4 +204,8 @@ export class StructureManager {
   public async sendNews(news: News) {
     this.publisher.post(news);
   }
+
+  public async seenNews(pIdMember: String, pSeenNews: [String]) {
+    await Proxy.getInstance().seenNews(pIdMember, pSeenNews);
+  }
 }

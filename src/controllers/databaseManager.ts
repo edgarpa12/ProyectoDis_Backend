@@ -1,6 +1,14 @@
 import { Member } from "../Models/member";
 import { CompositeStructure } from "../Models/structureComposite";
-import { branchS, ccgS, memberS, newsS, organizationS, structureS } from "../Models/Schemas";
+import {
+  memberS,
+  structureS,
+  organizationS,
+  branchS,
+  ccgS,
+  newsS,
+  newsHistoryS,
+} from "../Models/Schemas";
 import { Document } from "mongoose";
 import { CCG } from "../models/CCG";
 import { News } from "../models/news";
@@ -11,7 +19,7 @@ export class DatabaseManager {
   //DATABASE -> MEMORY MEMBERS
   //DB MANAGER: Cargar Miembros a memoria
   async loadMembers(pIdOrganization: String): Promise<Member[]> {
-    let membersFromDB = await memberS.find({ "idOrganization": pIdOrganization });
+    let membersFromDB = await memberS.find({ idOrganization: pIdOrganization });
     let members: Member[] = await this.getListMembers(membersFromDB);
     return members;
   }
@@ -89,31 +97,54 @@ export class DatabaseManager {
   }
 
   //DATABASE -> MEMORY
-  async loadStructures(pParent: String, pIdOrganization: String): Promise<CompositeStructure[]> {
+  async loadStructures(
+    pParent: String,
+    pIdOrganization: String
+  ): Promise<CompositeStructure[]> {
     let memoryMembers = await this.loadMembers(pIdOrganization);
     let zones: Document[] = await this.getStructures(pParent);
-    let structures: CompositeStructure[] = await this.getListStructure(zones, pIdOrganization, memoryMembers);
+    let structures: CompositeStructure[] = await this.getListStructure(
+      zones,
+      pIdOrganization,
+      memoryMembers
+    );
 
     return structures;
   }
 
   async loadBranches(pIdOrganization: String): Promise<String[]> {
-    let branchesFromDB = await branchS.find({ "idOrganization": pIdOrganization });
+    let branchesFromDB = await branchS.find({
+      idOrganization: pIdOrganization,
+    });
     let branches: String[] = [];
     for (const branch of branchesFromDB) {
-      branches.push(branch.get('name'))
+      branches.push(branch.get("name"));
     }
     return branches;
   }
 
-  async getListStructure(data: Document[], pIdOrganization: String, pMemoryMembers: Member[]): Promise<CompositeStructure[]> {
+  async getListStructure(
+    data: Document[],
+    pIdOrganization: String,
+    pMemoryMembers: Member[]
+  ): Promise<CompositeStructure[]> {
     const structures: CompositeStructure[] = [];
     if (data != null || data != []) {
       for (let index = 0; index < data.length; index++) {
         let children = await this.getStructures(data[index]._id);
-        let groups = await this.getListStructure(children, pIdOrganization, pMemoryMembers);
-        let members = await this.findMembers(data[index].get("members"), pMemoryMembers);
-        let bosses = await this.findMembers(data[index].get("bosses"), pMemoryMembers);
+        let groups = await this.getListStructure(
+          children,
+          pIdOrganization,
+          pMemoryMembers
+        );
+        let members = await this.findMembers(
+          data[index].get("members"),
+          pMemoryMembers
+        );
+        let bosses = await this.findMembers(
+          data[index].get("bosses"),
+          pMemoryMembers
+        );
         let objectComposite = new CompositeStructure(
           data[index].id,
           data[index].get("name"),
@@ -133,13 +164,16 @@ export class DatabaseManager {
   //DB MANAGER: STRUCTURES METHODS
   //DB MANAGER: CREA una structure en la  base de datos
   async createStructure(pName: String, pParent: String, pGroupNumber: String) {
-    let searchedStrucutre = await structureS.find({ name: pName, parent: pParent });
+    let searchedStrucutre = await structureS.find({
+      name: pName,
+      parent: pParent,
+    });
     //Valida si no existe una estructura con ese nombre
     if (searchedStrucutre.length == 0) {
       let persistantStructure = new structureS({
         name: pName,
         parent: pParent,
-        groupNumber: pGroupNumber
+        groupNumber: pGroupNumber,
       });
       return await persistantStructure.save();
     }
@@ -200,8 +234,8 @@ export class DatabaseManager {
 
   async loadDefaultBranches(pIdOrganization: String) {
     const branches = await branchS.find({
-      idOrganization: pIdOrganization
-    })
+      idOrganization: pIdOrganization,
+    });
     let defaultBranches: String[] = [];
     for (const document of branches) {
       defaultBranches.push(document.get("name"));
@@ -295,7 +329,11 @@ export class DatabaseManager {
     };
   }
 
-  async updateDefaultBranch(pIdOrganization: String, pOldName: String, pName: String) {
+  async updateDefaultBranch(
+    pIdOrganization: String,
+    pOldName: String,
+    pName: String
+  ) {
     let searchedBranch = branchS.find({
       idOrganization: pIdOrganization,
       name: pName,
@@ -320,7 +358,6 @@ export class DatabaseManager {
     });
     return message;
   }
-
 
   // Organization
   async validateOrganization(
@@ -371,7 +408,7 @@ export class DatabaseManager {
       idOrganization: Organization.getInstance().id,
       from: pCcg.from,
       body: pCcg.body,
-      type: pCcg.type
+      type: pCcg.type,
     });
     return await persistantCCG.save();
   }
@@ -381,8 +418,28 @@ export class DatabaseManager {
       from: pNews.from,
       to: component,
       body: pNews.body,
-      images: pNews.images
+      images: pNews.images,
     });
     return await persistantNews.save();
   }
+
+
+  async seenNews(pIdMember: String, pNews: [String]) {
+    let searchedMember = newsHistoryS.find({ member: pIdMember });
+    //Valida si no existe una estructura con ese nombre
+    if ((await searchedMember).length == 0) {
+      const persistantNewsHistory = new newsHistoryS({
+        member: pIdMember,
+        seenNews: pNews
+      });
+      return await persistantNewsHistory.save();
+      }else {
+      const message = newsHistoryS.updateOne(
+        {member: pIdMember,},
+        {$push: { seenNews: pNews },
+      });
+      return await message.save();
+    }
+  }
+
 }

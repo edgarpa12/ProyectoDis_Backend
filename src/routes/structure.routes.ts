@@ -66,4 +66,7 @@ routerStructure.post(
   "/removeMonitorFromGroup",
   facadeAsesor.removeMonitorFromGroup
 );
+
+routerStructure.post("/seenNews",
+facadeMiembros.seenNews);
 export default routerStructure;

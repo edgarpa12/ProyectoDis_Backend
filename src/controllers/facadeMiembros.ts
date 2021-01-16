@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { GeneralController } from "./generalController";
+import { saveImages } from "../routes/helpers";
 
 export class FacadeMiembros {
 
@@ -36,7 +37,11 @@ export class FacadeMiembros {
       const response = await GeneralController.getInstance().getStructureBosses(ids);
       return res.json(response);
     } catch (err) {
-      console.error(err);
+      return res.status(500).send({
+        success: false,
+        members: err.toString(),
+        data: null,
+      });
     }
   }
 
@@ -46,7 +51,11 @@ export class FacadeMiembros {
       const response = await GeneralController.getInstance().getStructureMembers(ids);
       return res.json(response);
     } catch (err) {
-      console.error(err);
+      return res.status(500).send({
+        success: false,
+        members: err.toString(),
+        data: null,
+      });
     }
   }
 
@@ -58,7 +67,11 @@ export class FacadeMiembros {
       );
       return res.json(response);
     } catch (err) {
-      console.error(err);
+      return res.status(500).send({
+        success: false,
+        members: err.toString(),
+        data: null,
+      });
     }
   }
 
@@ -68,17 +81,43 @@ export class FacadeMiembros {
       const response = await GeneralController.getInstance().sendCCG(from, body, type);
       return res.json(response);
     } catch (err) {
-      console.error(err);
+      return res.status(500).send({
+        success: false,
+        members: err.toString(),
+        data: null,
+      });
     }
   }
 
   public async sendNews(req: Request, res: Response) {
     try {
-      const { from, to, body, images } = req.body;
-      const response = await GeneralController.getInstance().sendNews(from, to, body, images);
-      return res.json(response);
+      const {from, to, body} = req.body;
+      const images = await saveImages(req, res);
+      await GeneralController.getInstance().sendNews(from, to, body, images);
+      return res.json("La llama que llama");
+      // const { from, to, body, images } = req.body;
+      // const response = await GeneralController.getInstance().sendNews(from, to, body, images);
+      // return res.json(response);
     } catch (err) {
-      console.error(err);
+      return res.status(500).send({
+        success: false,
+        members: err.toString(),
+        data: null,
+      });
+    }
+  }
+
+  public async seenNews(req: Request, res: Response) {
+    try {
+      const {idMember,seenNews} = req.body;
+      await GeneralController.getInstance().seenNews(idMember, seenNews);
+      return res.json("La llama que llama");
+    } catch (err) {
+      return res.status(500).send({
+        success: false,
+        members: err.toString(),
+        data: null,
+      });
     }
   }
 }

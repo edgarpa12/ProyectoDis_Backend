@@ -85,4 +85,11 @@ export class Proxy implements DBInterface {
         this.members = await this.databaseManager.loadMembers(pIdOrganization);
         return this.members;
     }
+  // public async loadMembers(pIdOrganization: String) {
+  //  this.members = await this.databaseManager.loadMembers(pIdOrganization);
+  // }
+
+  async seenNews(pIdMember: String, pSeenNews: [String]) {
+    await this.databaseManager.seenNews(pIdMember, pSeenNews);
+  }
 }

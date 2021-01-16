@@ -27,9 +27,8 @@ class App {
     this.express.use(bodyParser.urlencoded({ extended: true }));
     this.express.use(express.urlencoded({ extended: true }));
     this.express.use(helmet());
-    this.express.use(multer().any());
     this.express.use(cookieParser());
-
+    this.express.use(express.static(process.cwd() + '/static'));
   }
 
   private setRoutes(): void {

@@ -259,9 +259,13 @@ export class GeneralController {
         return await Organization.getInstance().sendCCG(ccg, type);
     }
 
-    // from: idMember, to: idStructure
-    public async sendNews(from: String, to: String, body: String, images: String[]) {
-        const news = new News(from, to, body, images);
-        return await Organization.getInstance().sendNews(news);
-    }
+  // from: idMember, to: idStructure
+  public async sendNews(from: String, to: String, body: String, images: String[]) {
+    const news = new News(from, to, body, images);
+    await Organization.getInstance().sendNews(news);
+  }
+  
+  public async seenNews(pIdMember:String, pSeenNews:[String]) {
+    await Organization.getInstance().seenNews(pIdMember,pSeenNews);
+  }
 }

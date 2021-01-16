@@ -341,4 +341,10 @@ export class Organization {
     public async sendNews(news: News) {
         await this.structureM.sendNews(news);
     }
+
+  public async seenNews(pIdMember:String, pSeenNews:[String]){
+    await this.structureM.seenNews(pIdMember,pSeenNews);
+  }
+
+
 }
