@@ -1,10 +1,37 @@
-import {Request, Response} from "express";
-import {GeneralController} from "./generalController";
+import { Request, Response } from "express";
+import { IncomingMessage } from "http";
+import { registerImage, saveImages } from "../routes/helpers";
+import { GeneralController } from "./generalController";
 
 export class FacadeAsesor {
 
+    public async signUp(req: Request, res: Response) {
+        //const image = await registerImage(req, res);
+        //console.log(req.body);
+        const ceo = req.body.ceo;
+        const organization = req.body.organization;
+
+        //console.log(ceo);
+        //console.log(organization);
+        try {
+            // const image = await registerImage(req, res);
+            //console.log(image);
+            console.log(req.body.ceo);
+            console.log(req.body.organization);
+            console.log(req.body.logo);
+            // const message = await GeneralController.getInstance().signUp(ceo, organization);
+            // return res.json(message);
+        } catch (err) {
+            return res.status(500).send({
+                success: false,
+                message: err.toString(),
+                data: null,
+            });
+        }
+    }
+
     public async changeGroup(req: Request, res: Response) {
-        const {idUser, idOldGroup, ids} = req.body;
+        const { idUser, idOldGroup, ids } = req.body;
         try {
             const response = await GeneralController.getInstance().changeGroup(
                 idUser,
@@ -22,7 +49,7 @@ export class FacadeAsesor {
     }
 
     public async createMember(req: Request, res: Response) {
-        const {name, phone, email, direction, monitor} = req.body;
+        const { name, phone, email, direction, monitor } = req.body;
         try {
             const message = await GeneralController.getInstance().createMember(
                 name,
@@ -43,7 +70,7 @@ export class FacadeAsesor {
     }
 
     public async updateMember(req: Request, res: Response) {
-        const {id, newData} = req.body;
+        const { id, newData } = req.body;
         try {
             const message = await GeneralController.getInstance().updateMember(id, newData);
             return res.json(message);
@@ -57,7 +84,7 @@ export class FacadeAsesor {
     }
 
     public async deleteMember(req: Request, res: Response) {
-        const {id} = req.body;
+        const { id } = req.body;
         try {
             const message = await GeneralController.getInstance().deleteMember(id);
             return res.json(message);
@@ -85,7 +112,7 @@ export class FacadeAsesor {
 
     public async createStructure(req: Request, res: Response) {
         console.log(req.body);
-        const {name, idParent, groupNumber} = req.body;
+        const { name, idParent, groupNumber } = req.body;
         try {
             const message = await GeneralController.getInstance().createStructure(
                 name,
@@ -104,7 +131,7 @@ export class FacadeAsesor {
     }
 
     public async updateStructure(req: Request, res: Response) {
-        const {_id, newName} = req.body;
+        const { _id, newName } = req.body;
         try {
             const message = await GeneralController.getInstance().updateStructure(
                 _id,
@@ -121,7 +148,7 @@ export class FacadeAsesor {
     }
 
     public async deleteStructure(req: Request, res: Response) {
-        const {id} = req.body;
+        const { id } = req.body;
         try {
             const message = await GeneralController.getInstance().deleteStructure(id);
             return res.json(message);
@@ -163,7 +190,7 @@ export class FacadeAsesor {
 
     public async addMemberToGroup(req: Request, res: Response) {
         try {
-            const {idMember, ids} = req.body;
+            const { idMember, ids } = req.body;
             const response = await GeneralController.getInstance().addMemberToGroup(
                 idMember,
                 ids
@@ -175,7 +202,7 @@ export class FacadeAsesor {
     }
 
     public async addBossToGroup(req: Request, res: Response) {
-        const {idBoss, ids} = req.body;
+        const { idBoss, ids } = req.body;
         try {
             const response = await GeneralController.getInstance().addBossToGroup(
                 idBoss,
@@ -192,7 +219,7 @@ export class FacadeAsesor {
     }
 
     public async removeMemberFromStructure(req: Request, res: Response) {
-        const {idMember, idGroup} = req.body;
+        const { idMember, idGroup } = req.body;
         try {
             const response = await GeneralController.getInstance().removeMemberFromStructure(
                 idMember,
@@ -209,7 +236,7 @@ export class FacadeAsesor {
     }
 
     public async removeBossFromStructure(req: Request, res: Response) {
-        const {idMember, idBranch, idGroup} = req.body;
+        const { idMember, idBranch, idGroup } = req.body;
         try {
             const response = await GeneralController.getInstance().removeBossFromStructure(
                 idMember,
@@ -240,7 +267,7 @@ export class FacadeAsesor {
     }
 
     public async addDefaultBranch(req: Request, res: Response) {
-        const {idOrganization, name} = req.body;
+        const { idOrganization, name } = req.body;
         try {
             const response = await GeneralController.getInstance().addDefaultBranch(
                 idOrganization,
@@ -253,7 +280,7 @@ export class FacadeAsesor {
     }
 
     public async updateDefaultBranch(req: Request, res: Response) {
-        const {oldName, name} = req.body;
+        const { oldName, name } = req.body;
         try {
             const response = await GeneralController.getInstance().updateDefaultBranch(
                 oldName,
@@ -266,7 +293,7 @@ export class FacadeAsesor {
     }
 
     public async removeDefaultBranch(req: Request, res: Response) {
-        const {name} = req.body;
+        const { name } = req.body;
         try {
             const response = await GeneralController.getInstance().removeDefaultBranch(
                 name
@@ -278,7 +305,7 @@ export class FacadeAsesor {
     }
 
     public async addMonitorToGroup(req: Request, res: Response) {
-        const {idMonitor, ids} = req.body;
+        const { idMonitor, ids } = req.body;
         try {
             const response = await GeneralController.getInstance().addMonitorToGroup(
                 idMonitor,
@@ -291,7 +318,7 @@ export class FacadeAsesor {
     }
 
     public async removeMonitorFromGroup(req: Request, res: Response) {
-        const {idMember, idBranch, idGroup} = req.body;
+        const { idMember, idBranch, idGroup } = req.body;
         try {
             const response = await GeneralController.getInstance().removeMonitorFromGroup(
                 idMember,
@@ -305,7 +332,7 @@ export class FacadeAsesor {
     }
 
     public async updateOrganization(req: Request, res: Response) {
-        const {idOrganization, newData} = req.body;
+        const { idOrganization, newData } = req.body;
         try {
             const response = await GeneralController.getInstance().updateOrganization(idOrganization, newData);
             return res.json(response);
@@ -315,7 +342,7 @@ export class FacadeAsesor {
     }
 
     public async deleteOrganization(req: Request, res: Response) {
-        const {idOrganization} = req.body;
+        const { idOrganization } = req.body;
         try {
             const response = await GeneralController.getInstance().deleteOrganization(idOrganization);
             return res.json(response);

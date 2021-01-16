@@ -116,39 +116,42 @@ export class GeneralController {
             });
         }
     }
+    // public async signUp(req: Request, res: Response) {
+    //     const {
+    //         name,
+    //         legalCertificate,
+    //         web,
+    //         direction,
+    //         phone,
+    //         logoName,
+    //         country,
+    //         email,
+    //         password,
+    //     } = req.body;
+    //     try {
+    //         const message = await Organization.getInstance().signUp(
+    //             name,
+    //             legalCertificate,
+    //             web,
+    //             direction,
+    //             phone,
+    //             logoName,
+    //             country,
+    //             email,
+    //             password
+    //         );
+    //         return res.json(message);
+    //     } catch (err) {
+    //         return res.status(500).send({
+    //             success: false,
+    //             message: err.toString(),
+    //             data: null,
+    //         });
+    //     }
+    // }
 
-    public async signUp(req: Request, res: Response) {
-        const {
-            name,
-            legalCertificate,
-            web,
-            direction,
-            phone,
-            logoName,
-            country,
-            email,
-            password,
-        } = req.body;
-        try {
-            const message = await Organization.getInstance().signUp(
-                name,
-                legalCertificate,
-                web,
-                direction,
-                phone,
-                logoName,
-                country,
-                email,
-                password
-            );
-            return res.json(message);
-        } catch (err) {
-            return res.status(500).send({
-                success: false,
-                message: err.toString(),
-                data: null,
-            });
-        }
+    public async signUp(ceo: any, organization: any) {
+        return await Organization.getInstance().signUp(ceo, organization);
     }
 
     public signOut(req: Request, res: Response) {

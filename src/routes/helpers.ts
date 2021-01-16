@@ -32,8 +32,26 @@ export async function saveImages(req: Request, res: Response): Promise<String[]>
           reject('Please select an image to upload');
         else if (err)
           reject(err);
+        console.log(req.files);
         // @ts-ignore
         resolve(req.files.map((f) => f.filename));
+      }
+    );
+  });
+}
+
+export async function registerImage(req: Request, res: Response): Promise<String> {
+  return await new Promise<String>((resolve, reject) => {
+    upload(req, res, function (err: any) {
+        // if ((<any>req).fileValidationError)
+        //   reject((<any>req).fileValidationError);
+        // else if (!req.file)
+        //   reject('Please select an image to upload');
+        // else if (err)
+        //   reject(err);
+        // @ts-ignore
+        console.log("Files: ", req.body);
+        resolve("123");
       }
     );
   });

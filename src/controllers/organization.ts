@@ -161,28 +161,33 @@ export class Organization {
         return this.structureM.findLevel(pIdParent);
     }
 
-    public signUp(
-        pName: String,
-        pLegalCertificate: String,
-        pWeb: String,
-        pDirection: String,
-        pPhone: String,
-        pLogoName: String,
-        pCountry: String,
-        pEmail: String,
-        pPassword: String
-    ) {
-        return this.databaseM.createOrganization(
-            pName,
-            pLegalCertificate,
-            pWeb,
-            pDirection,
-            pPhone,
-            pLogoName,
-            pCountry,
-            pEmail,
-            pPassword
-        );
+    // public signUp(
+    //     pName: String,
+    //     pLegalCertificate: String,
+    //     pWeb: String,
+    //     pDirection: String,
+    //     pPhone: String,
+    //     pLogoName: String,
+    //     pCountry: String,
+    //     pEmail: String,
+    //     pPassword: String
+    // ) {
+    //     return this.databaseM.createOrganization(
+    //         pName,
+    //         pLegalCertificate,
+    //         pWeb,
+    //         pDirection,
+    //         pPhone,
+    //         pLogoName,
+    //         pCountry,
+    //         pEmail,
+    //         pPassword
+    //     );
+    // }
+
+    public signUp(pCeo: any, pOrganization: any) {
+        console.log(pCeo);
+        console.log(pOrganization);
     }
 
     public async signIn(email: String, password: String) {
