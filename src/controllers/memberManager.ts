@@ -10,10 +10,7 @@ export class MemberManager implements ICRUD {
   }
 
   public async read(...args: any[]) {
-    for (let i = 0; i < this.getMembers().length; i++) {
-      const member = this.getMembers()[i];
-      if (member.id == args[0]) return member;
-    }
+    return this.getMembers().find((member) => member.id == args[0]);
   }
 
   public async update(...args: any[]) {
@@ -33,12 +30,6 @@ export class MemberManager implements ICRUD {
   }
 
   public async getMonitors() {
-    let monitors: Member[] = [];
-    this.getMembers().forEach((member) => {
-      if (member.monitor) {
-        monitors.push(member);
-      }
-    });
-    return monitors;
+    return this.getMembers().filter((member) => member.monitor);
   }
 }

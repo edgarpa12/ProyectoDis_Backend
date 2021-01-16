@@ -1,14 +1,6 @@
 import { Member } from "../Models/member";
 import { CompositeStructure } from "../Models/structureComposite";
-import {
-  memberS,
-  structureS,
-  organizationS,
-  branchS,
-  ccgS,
-  newsS,
-  newsHistoryS
-} from "../Models/Schemas";
+import { branchS, ccgS, memberS, newsS, organizationS, structureS } from "../Models/Schemas";
 import { Document } from "mongoose";
 import { CCG } from "../models/CCG";
 import { News } from "../models/news";
@@ -19,7 +11,7 @@ export class DatabaseManager {
   //DATABASE -> MEMORY MEMBERS
   //DB MANAGER: Cargar Miembros a memoria
   async loadMembers(pIdOrganization: String): Promise<Member[]> {
-    let membersFromDB = await memberS.find({"idOrganization": pIdOrganization});
+    let membersFromDB = await memberS.find({ "idOrganization": pIdOrganization });
     let members: Member[] = await this.getListMembers(membersFromDB);
     return members;
   }
@@ -65,17 +57,23 @@ export class DatabaseManager {
     pIdOrganization: String,
     pPhone: String,
     pEmail: String,
-    pDirection: String
+    pDirection: String,
+    pMonitor: Boolean
   ) {
-    const persistantMember = new memberS({
-      name: pName,
-      idOrganization: pIdOrganization,
-      phone: pPhone,
-      email: pEmail,
-      direction: pDirection,
-    });
-    const message = await persistantMember.save();
-    return message;
+    if (await memberS.exists({ email: pEmail })) {
+      return 0;
+    }
+    else {
+      const persistantMember = new memberS({
+        name: pName,
+        idOrganization: pIdOrganization,
+        phone: pPhone,
+        email: pEmail,
+        direction: pDirection,
+        monitor: pMonitor
+      });
+      return await persistantMember.save();
+    }
   }
 
   //DB MANAGER: MODIFICAR un miembro en la base de datos
@@ -100,7 +98,7 @@ export class DatabaseManager {
   }
 
   async loadBranches(pIdOrganization: String): Promise<String[]> {
-    let branchesFromDB = await branchS.find({"idOrganization": pIdOrganization});
+    let branchesFromDB = await branchS.find({ "idOrganization": pIdOrganization });
     let branches: String[] = [];
     for (const branch of branchesFromDB) {
       branches.push(branch.get('name'))
@@ -135,7 +133,7 @@ export class DatabaseManager {
   //DB MANAGER: STRUCTURES METHODS
   //DB MANAGER: CREA una structure en la  base de datos
   async createStructure(pName: String, pParent: String, pGroupNumber: String) {
-    let searchedStrucutre = await structureS.find({name: pName, parent: pParent});
+    let searchedStrucutre = await structureS.find({ name: pName, parent: pParent });
     //Valida si no existe una estructura con ese nombre
     if (searchedStrucutre.length == 0) {
       let persistantStructure = new structureS({
@@ -143,10 +141,9 @@ export class DatabaseManager {
         parent: pParent,
         groupNumber: pGroupNumber
       });
-      const responseDB = await persistantStructure.save();
-      return responseDB;
+      return await persistantStructure.save();
     }
-    return {message: "Already exists a structure with this name: " + pName};
+    return { message: "Already exists a structure with this name: " + pName };
   }
 
   //DB MANAGER: OBTIENE una structure en la  base de datos
@@ -160,13 +157,13 @@ export class DatabaseManager {
 
   //DB MANAGER: OBTIENE una structure en la  base de datos
   async getStructures(pParent: String) {
-    let structures = await structureS.find({parent: pParent});
+    let structures = await structureS.find({ parent: pParent });
     return structures;
   }
 
   //DB MANAGER: MODIFICA una structure en la  base de datos
   async updateStructure(pId: String, pNewName: String) {
-    let searchedStructure = structureS.find({name: pNewName});
+    let searchedStructure = structureS.find({ name: pNewName });
     //Valida si no existe una estructura con ese nombre
     if ((await searchedStructure).length == 0) {
       const responseDB = await structureS.findByIdAndUpdate(pId, {
@@ -214,7 +211,7 @@ export class DatabaseManager {
 
   //DB MANAGER: Devuelve los hijos de una estructura padre
   async findLevel(pIdParent: String) {
-    const data = await structureS.find({parent: pIdParent});
+    const data = await structureS.find({ parent: pIdParent });
     return data;
   }
 
@@ -253,26 +250,26 @@ export class DatabaseManager {
   //OTHER FUNCTIONS
   async addMemberToGroup(pIdMember: String, pIdStructure: String) {
     const message = await structureS.findByIdAndUpdate(pIdStructure, {
-      $push: {members: pIdMember},
+      $push: { members: pIdMember },
     });
-    return {message: "Usuario Añadido"};
+    return { message: "Usuario Añadido" };
   }
 
   async removeFromGroup(pSearch: Object, pIdStructure: String) {
     const deleted = await structureS.findByIdAndUpdate(
       pIdStructure,
-      {$pull: pSearch}
+      { $pull: pSearch }
     );
-    return {message: "Usuario Eliminado"};
+    return { message: "Usuario Eliminado" };
   }
 
   async addBossToGroup(pIdMember: String, pIdStructure: String) {
     //Validar no más de dos
     const message = await structureS.updateOne(
-      {_id: pIdStructure},
-      {$push: {bosses: pIdMember}}
+      { _id: pIdStructure },
+      { $push: { bosses: pIdMember } }
     );
-    let struct = await structureS.findOne({_id: pIdStructure});
+    let struct = await structureS.findOne({ _id: pIdStructure });
     const idParent = struct?.toJSON().parent;
     this.addMemberToGroup(pIdMember, idParent);
     return message;
@@ -306,8 +303,8 @@ export class DatabaseManager {
     //Valida si no existe una estructura con ese nombre
     if ((await searchedBranch).length == 0) {
       const persistantDefaultBranch = await branchS.update(
-        {idOrganization: pIdOrganization, name: pOldName},
-        {name: pName}
+        { idOrganization: pIdOrganization, name: pOldName },
+        { name: pName }
       );
       return persistantDefaultBranch;
     }

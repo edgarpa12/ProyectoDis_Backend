@@ -12,7 +12,7 @@ memberSchema.add({
   direction: { type: String, required: true },
   dateBegin: { type: Date, required: true, default: new Date() },
   dateEnd: { type: Date, required: true, default: new Date() },
-  monitor: { type: Boolean, required: true, default: false },
+  monitor: { type: Boolean, required: true },
   status: { type: Status, required: true, default: Status.ACTIVE },
 });
 
