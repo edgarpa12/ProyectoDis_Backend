@@ -286,7 +286,7 @@ export class DatabaseManager {
 
   //OTHER FUNCTIONS
   async addMemberToGroup(pIdMember: String, pIdStructure: String) {
-    const message = await structureS.findByIdAndUpdate(pIdStructure, {
+    await structureS.findByIdAndUpdate(pIdStructure, {
       $push: { members: pIdMember },
     });
     return { msg: 1 };
@@ -454,7 +454,8 @@ export class DatabaseManager {
       body: pCcg.body,
       type: pCcg.type,
     });
-    return await persistantCCG.save();
+    await persistantCCG.save();
+    return {msg:1}
   }
 
   async saveNews(pNews: News, component: AbstractComponent) {
@@ -464,7 +465,8 @@ export class DatabaseManager {
       body: pNews.body,
       images: pNews.images,
     });
-    return await persistantNews.save();
+    await persistantNews.save();
+    return {msg:1}
   }
 
   async seenNews(pIdMember: String, pNews: [String]) {
@@ -475,13 +477,14 @@ export class DatabaseManager {
         member: pIdMember,
         seenNews: pNews,
       });
-      return await persistantNewsHistory.save();
+      await persistantNewsHistory.save();
+      return {msg:1}
     } else {
-      const message = newsHistoryS.updateOne(
+      await newsHistoryS.updateOne(
         { member: pIdMember },
         { $push: { seenNews: pNews } }
       );
-      return await message.save();
+      return {msg:1}
     }
   }
 }
