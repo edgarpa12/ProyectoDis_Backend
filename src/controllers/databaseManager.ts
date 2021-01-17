@@ -20,7 +20,7 @@ export class DatabaseManager {
   //DATABASE -> MEMORY MEMBERS
   //DB MANAGER: Cargar Miembros a memoria
   async loadMembers(pIdOrganization: String): Promise<Member[]> {
-    let membersFromDB = await memberS.find({ idOrganization: pIdOrganization });
+    let membersFromDB = await memberS.find({ idOrganization: pIdOrganization, role: { $ne: "CEO" } });
     let members: Member[] = await this.getListMembers(membersFromDB);
     return members;
   }
@@ -35,10 +35,11 @@ export class DatabaseManager {
         document.get("name"),
         document.get("phone"),
         document.get("email"),
+        document.get("password"),
         document.get("direction"),
         document.get("dateBegin"),
         document.get("dateEnd"),
-        document.get("monitor"),
+        document.get("role"),
         document.get("status")
       );
       members.push(member);
@@ -394,14 +395,12 @@ export class DatabaseManager {
           branches,],
         member
       ]
-
-      return response;
-
-
     } else {
-      // Cambiar
-      return [];
+      // Que asco pero sino no lo agarraba
+      response = ["0"]
     }
+
+    return response;
   }
 
   // Organization

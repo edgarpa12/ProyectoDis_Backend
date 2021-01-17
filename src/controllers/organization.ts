@@ -249,7 +249,15 @@ export class Organization {
         //     return organization;
         // }
 
-        return await this.memberM.signIn(email, password);
+        const response = await this.memberM.signIn(email, password);
+        const organization = response[0];
+
+        if (organization !== "0") {
+            this.loadData(organization);
+            return response;
+        } else {
+            return 0;
+        }
 
     }
 
@@ -265,7 +273,7 @@ export class Organization {
         return "Tudo Bem";
     }
 
-    public loadData(data: (String | String[])[]) {
+    public loadData(data: (String | String[][])) {
         this.id = data[0] as String;
         this.legalCertificate = data[1] as String;
         this.web = data[2] as String;

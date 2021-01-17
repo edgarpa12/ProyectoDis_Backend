@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { GeneralController } from "./generalController";
 import { saveImages } from "../routes/helpers";
+import { memberS } from "../Models/Schemas";
 
 export class FacadeMiembros {
 
@@ -91,7 +92,7 @@ export class FacadeMiembros {
 
   public async sendNews(req: Request, res: Response) {
     try {
-      const {from, to, body} = req.body;
+      const { from, to, body } = req.body;
       const images = await saveImages(req, res);
       await GeneralController.getInstance().sendNews(from, to, body, images);
       return res.json("La llama que llama");
@@ -109,7 +110,7 @@ export class FacadeMiembros {
 
   public async seenNews(req: Request, res: Response) {
     try {
-      const {idMember,seenNews} = req.body;
+      const { idMember, seenNews } = req.body;
       await GeneralController.getInstance().seenNews(idMember, seenNews);
       return res.json("La llama que llama");
     } catch (err) {

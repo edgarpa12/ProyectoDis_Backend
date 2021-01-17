@@ -261,7 +261,6 @@ export class GeneralController {
     // from: idMember
     public async sendCCG(from: String, body: String, type: String,) {
         const ccg = new CCG(from, body, type);
-        console.log(ccg);
         return await Organization.getInstance().sendCCG(ccg, type);
     }
 
