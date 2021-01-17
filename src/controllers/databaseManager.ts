@@ -70,15 +70,14 @@ export class DatabaseManager {
   ) {
     if (await memberS.exists({ email: pEmail })) {
       return 0;
-    }
-    else {
+    } else {
       const persistantMember = new memberS({
         name: pName,
         idOrganization: pIdOrganization,
         phone: pPhone,
         email: pEmail,
         direction: pDirection,
-        monitor: pMonitor
+        monitor: pMonitor,
       });
       return await persistantMember.save();
     }
@@ -86,14 +85,15 @@ export class DatabaseManager {
 
   //DB MANAGER: MODIFICAR un miembro en la base de datos
   async updateMember(pId: String, pUpdate: Object) {
-    const message = await memberS.findByIdAndUpdate(pId, pUpdate);
-    return message;
+    console.log(pUpdate);
+    await memberS.findByIdAndUpdate(pId, pUpdate);
+    return { msg: 1 };
   }
 
   //DB MANAGER: ELIMINAR un miembro en la base de datos
   async deleteMember(pId: String) {
-    const messsage = await memberS.findByIdAndDelete(pId);
-    return messsage;
+    await memberS.findByIdAndDelete(pId);
+    return { msg: 1 };
   }
 
   //DATABASE -> MEMORY
@@ -175,9 +175,10 @@ export class DatabaseManager {
         parent: pParent,
         groupNumber: pGroupNumber,
       });
-      return await persistantStructure.save();
+      await persistantStructure.save();
+      return { msg: 1 };
     }
-    return { message: "Already exists a structure with this name: " + pName };
+    return { msg: 0 };
   }
 
   //DB MANAGER: OBTIENE una structure en la  base de datos
@@ -200,14 +201,12 @@ export class DatabaseManager {
     let searchedStructure = structureS.find({ name: pNewName });
     //Valida si no existe una estructura con ese nombre
     if ((await searchedStructure).length == 0) {
-      const responseDB = await structureS.findByIdAndUpdate(pId, {
+      await structureS.findByIdAndUpdate(pId, {
         name: pNewName,
       });
-      return responseDB;
+      return { msg: 1 };
     }
-    return {
-      message: "Already exists a structure with this name: " + pNewName,
-    };
+    return { msg: 0 };
   }
 
   //DB MANAGER: ELIMINA una structure en la  base de datos
@@ -218,10 +217,12 @@ export class DatabaseManager {
         return this.deleteStructure(structure._id);
       });
     }
-    const message = await structureS.findByIdAndDelete(pIdParent);
-    return message;
+    //No hay validacion
+    await structureS.findByIdAndDelete(pIdParent);
+    return { msg: 1 };
   }
 
+  ///REVISAR ESTO
   //DB MANAGER: ELIMINA una structure en la  base de datos
   async removeBoss(pIdMember: String, pIdParent: String) {
     const structures = await this.getStructures(pIdParent);
@@ -286,27 +287,26 @@ export class DatabaseManager {
     const message = await structureS.findByIdAndUpdate(pIdStructure, {
       $push: { members: pIdMember },
     });
-    return { message: "Usuario Añadido" };
+    return { msg: 1 };
   }
 
   async removeFromGroup(pSearch: Object, pIdStructure: String) {
-    const deleted = await structureS.findByIdAndUpdate(
-      pIdStructure,
-      { $pull: pSearch }
-    );
-    return { message: "Usuario Eliminado" };
+    const deleted = await structureS.findByIdAndUpdate(pIdStructure, {
+      $pull: pSearch,
+    });
+    return { msg: 1 };
   }
 
   async addBossToGroup(pIdMember: String, pIdStructure: String) {
     //Validar no más de dos
-    const message = await structureS.updateOne(
+    await structureS.updateOne(
       { _id: pIdStructure },
       { $push: { bosses: pIdMember } }
     );
     let struct = await structureS.findOne({ _id: pIdStructure });
     const idParent = struct?.toJSON().parent;
     this.addMemberToGroup(pIdMember, idParent);
-    return message;
+    return { msg: 1 };
   }
 
   //Catalogo
@@ -321,11 +321,11 @@ export class DatabaseManager {
         idOrganization: pIdOrganization,
         name: pName,
       });
-      const message = await persistantDefaultBranch.save();
-      return message;
+      await persistantDefaultBranch.save();
+      return { msg: 1 };
     }
     return {
-      message: "Already exists a structure with this name: " + pName,
+      msg: 0,
     };
   }
 
@@ -340,23 +340,21 @@ export class DatabaseManager {
     });
     //Valida si no existe una estructura con ese nombre
     if ((await searchedBranch).length == 0) {
-      const persistantDefaultBranch = await branchS.update(
+      await branchS.update(
         { idOrganization: pIdOrganization, name: pOldName },
         { name: pName }
       );
-      return persistantDefaultBranch;
+      return { msg: 1 };
     }
-    return {
-      message: "Already exists a structure with this name: " + pName,
-    };
+    return {msg: 0,};
   }
 
   async deleteDefaultBranch(pIdOrganization: String, pName: String) {
-    const message = await branchS.findOneAndDelete({
+    await branchS.findOneAndDelete({
       idOrganization: pIdOrganization,
       name: pName,
     });
-    return message;
+    return {msg:1};
   }
 
   // Organization
@@ -423,23 +421,21 @@ export class DatabaseManager {
     return await persistantNews.save();
   }
 
-
   async seenNews(pIdMember: String, pNews: [String]) {
     let searchedMember = newsHistoryS.find({ member: pIdMember });
     //Valida si no existe una estructura con ese nombre
     if ((await searchedMember).length == 0) {
       const persistantNewsHistory = new newsHistoryS({
         member: pIdMember,
-        seenNews: pNews
+        seenNews: pNews,
       });
       return await persistantNewsHistory.save();
-      }else {
+    } else {
       const message = newsHistoryS.updateOne(
-        {member: pIdMember,},
-        {$push: { seenNews: pNews },
-      });
+        { member: pIdMember },
+        { $push: { seenNews: pNews } }
+      );
       return await message.save();
     }
   }
-
 }

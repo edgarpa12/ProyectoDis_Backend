@@ -119,19 +119,18 @@ export class StructureManager {
     let group: CompositeStructure = new CompositeStructure();
     for (let index = 0; index < branch.groups.length; index++) {
       group = branch.groups[index];
-      //Valida si ya es un miembro
       if (this.findMember(pIdMember, group.members) != null) {
-        return { message: "This user is already a member in this structure" };
+        return { msg: 0};
       }
     }
-    const message = await Proxy.getInstance().addMemberToGroup(pIdMember, group.id);
-    return message;
+    await Proxy.getInstance().addMemberToGroup(pIdMember, group.id);
+    return { msg: 1};
   }
 
   public async removeMemberFromStructure(pIdMember: String, pIdGroup: String) {
     let search = { members: pIdMember };
     const message = Proxy.getInstance().removeFromGroup(search, pIdGroup);
-    // this.loadStructures(this.idOrganization);
+    
     return message;
   }
 

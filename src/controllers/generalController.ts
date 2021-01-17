@@ -72,19 +72,21 @@ export class GeneralController {
 
     // Structure
     public async createStructure(name: String, idParent: String, groupNumber: String) {
-        return Organization.getInstance().createStructure(
+        const message = await Organization.getInstance().createStructure(
             name,
             idParent,
             groupNumber
         );
+        return message;
     }
 
 
     public async updateStructure(_id: String, newName: String) {
-        return await Organization.getInstance().updateStructure(
+         const message = await Organization.getInstance().updateStructure(
             _id,
             newName
         );
+        return message;
     }
 
     public async deleteStructure(id: String) {

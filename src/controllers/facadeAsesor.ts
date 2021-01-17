@@ -70,9 +70,10 @@ export class FacadeAsesor {
     }
 
     public async updateMember(req: Request, res: Response) {
-        const { id, newData } = req.body;
+        
+        const { id, data } = req.body;
         try {
-            const message = await GeneralController.getInstance().updateMember(id, newData);
+            const message = await GeneralController.getInstance().updateMember(id, data);
             return res.json(message);
         } catch (err) {
             return res.status(500).send({

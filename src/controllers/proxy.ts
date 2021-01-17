@@ -38,7 +38,8 @@ export class Proxy implements DBInterface {
     }
 
     public async updateStructure(...args: any[]) {
-        return await this.databaseManager.updateStructure(args[0], args[1]);
+        const data = args[0];
+        return await this.databaseManager.updateStructure(data[0], data[1]);
     }
 
     public async deleteStructure(...args: any[]) {
@@ -70,7 +71,8 @@ export class Proxy implements DBInterface {
     }
 
     public async updateMember(...args: any[]) {
-        return this.databaseManager.updateMember(args[0], args[1]);
+        const data = args[0];
+        return this.databaseManager.updateMember(data[0], data[1]);
     }
 
     public async deleteMember(...args: any[]) {
