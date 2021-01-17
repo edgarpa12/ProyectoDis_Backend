@@ -275,14 +275,16 @@ export class Organization {
 
     public loadData(data: (String | String[][])) {
         this.id = data[0] as String;
-        this.legalCertificate = data[1] as String;
-        this.web = data[2] as String;
-        this.direction = data[3] as String;
-        this.phone = data[4] as String;
-        this.logoName = data[5] as String;
-        this.country = data[6] as String;
-        this.email = data[7] as String;
-        this.branches = data[8] as String[];
+        this.name = data[1] as String;
+        this.legalCertificate = data[2] as String;
+        this.web = data[3] as String;
+        this.direction = data[4] as String;
+        this.phone = data[5] as String;
+        this.logoName = data[6] as String;
+        this.country = data[7] as String;
+        this.email = data[8] as String;
+        this.branches = data[9] as String[];
+        console.log("Organizacion: ", this.name);
     }
 
     public async getStructureMembers(pIds: String[]) {
