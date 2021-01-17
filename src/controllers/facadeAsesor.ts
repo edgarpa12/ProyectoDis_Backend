@@ -6,20 +6,13 @@ import { GeneralController } from "./generalController";
 export class FacadeAsesor {
 
     public async signUp(req: Request, res: Response) {
-        //const image = await registerImage(req, res);
-        //console.log(req.body);
-        const ceo = req.body.ceo;
-        const organization = req.body.organization;
-
-        //console.log(ceo);
-        //console.log(organization);
         try {
-            // const image = await registerImage(req, res);
-            //console.log(image);
-            console.log(req.body.ceo);
-            console.log(req.body.organization);
-            console.log(req.body.logo);
-            // const message = await GeneralController.getInstance().signUp(ceo, organization);
+            const image = await registerImage(req, res);
+            const ceo = JSON.parse(req.body.ceo);
+            const organization = JSON.parse(req.body.organization);
+            // Se introduce el nombre de la imagen nueva en organization.logoName
+            organization.logoName = image;
+            const message = await GeneralController.getInstance().signUp(ceo, organization);
             // return res.json(message);
         } catch (err) {
             return res.status(500).send({
