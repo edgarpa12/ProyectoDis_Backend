@@ -58,6 +58,10 @@ export class Proxy implements DBInterface {
 
     members: Member[] = [];
 
+    public async signIn(pEmail: String, pPassword: String) {
+        return await this.databaseManager.signIn(pEmail, pPassword);
+    }
+
     public async createMember(...args: any[]) {
         const data = args[0];
         return await this.databaseManager.createMember(
@@ -66,7 +70,8 @@ export class Proxy implements DBInterface {
             data[2],
             data[3],
             data[4],
-            data[5]
+            data[5],
+            data[6]
         );
     }
 
@@ -87,11 +92,74 @@ export class Proxy implements DBInterface {
         this.members = await this.databaseManager.loadMembers(pIdOrganization);
         return this.members;
     }
-  // public async loadMembers(pIdOrganization: String) {
-  //  this.members = await this.databaseManager.loadMembers(pIdOrganization);
-  // }
 
-  async seenNews(pIdMember: String, pSeenNews: [String]) {
-    await this.databaseManager.seenNews(pIdMember, pSeenNews);
-  }
+    async seenNews(pIdMember: String, pSeenNews: [String]) {
+        await this.databaseManager.seenNews(pIdMember, pSeenNews);
+    }
+
+
+    //////////// Organization ////////////
+
+    public createOrganization(
+        pName: String,
+        pLegalCertificate: String,
+        pWeb: String,
+        pDirection: String,
+        pPhone: String,
+        pLogoName: String,
+        pCountry: String,
+        pEmail: String
+    ) {
+        return this.databaseManager.createOrganization(
+            pName,
+            pLegalCertificate,
+            pWeb,
+            pDirection,
+            pPhone,
+            pLogoName,
+            pCountry,
+            pEmail
+        );
+    }
+
+
+    public async updateOrganization(pIdOrganization: String, pNewData: Object) {
+        return await this.databaseManager.updateOrganization(pIdOrganization, pNewData);
+    }
+
+    public async deleteOrganization(pIdOrganization: String) {
+        return await this.databaseManager.removeOrganization(pIdOrganization);
+    }
+
+    public async getDefaultBranches(pIdOrganization: String) {
+        return await this.databaseManager.loadDefaultBranches(pIdOrganization);
+    }
+
+    //CATALOGO
+
+    public async addDefaultBranch(pIdOrganization: String, pName: String) {
+        const responseDB = await this.databaseManager.addDefaultBranch(
+            pIdOrganization,
+            pName
+        );
+
+        return responseDB;
+    }
+
+    public async updateDefaultBranch(pOldName: String, pName: String, pIdOrganization: String) {
+        const responseDB = await this.databaseManager.updateDefaultBranch(
+            pIdOrganization,
+            pOldName,
+            pName
+        );
+        return responseDB;
+    }
+
+    public async deleteDefaultBranch(pName: String, pIdOrganization: String) {
+        const responseDB = await this.databaseManager.deleteDefaultBranch(
+            pIdOrganization,
+            pName
+        );
+        return responseDB;
+    }
 }

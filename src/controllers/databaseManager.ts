@@ -14,6 +14,7 @@ import { CCG } from "../models/CCG";
 import { News } from "../models/news";
 import { AbstractComponent } from "../models/abstractComponent";
 import { Organization } from "./organization";
+import { Roles } from "../models/roles";
 
 export class DatabaseManager {
   //DATABASE -> MEMORY MEMBERS
@@ -65,8 +66,9 @@ export class DatabaseManager {
     pIdOrganization: String,
     pPhone: String,
     pEmail: String,
+    pPassword: String,
     pDirection: String,
-    pMonitor: Boolean
+    pRole: String
   ) {
     if (await memberS.exists({ email: pEmail })) {
       return 0;
@@ -76,8 +78,9 @@ export class DatabaseManager {
         idOrganization: pIdOrganization,
         phone: pPhone,
         email: pEmail,
+        password: pPassword,
         direction: pDirection,
-        monitor: pMonitor,
+        role: pRole,
       });
       return await persistantMember.save();
     }
@@ -261,8 +264,7 @@ export class DatabaseManager {
     pPhone: String,
     pLogoName: String,
     pCountry: String,
-    pEmail: String,
-    pPassword: String
+    pEmail: String
   ) {
     const persistantOrganization = new organizationS({
       name: pName,
@@ -273,7 +275,6 @@ export class DatabaseManager {
       logoName: pLogoName,
       country: pCountry,
       email: pEmail,
-      password: pPassword,
       branches: [],
     });
     const message = await persistantOrganization.save();
@@ -346,7 +347,7 @@ export class DatabaseManager {
       );
       return { msg: 1 };
     }
-    return {msg: 0,};
+    return { msg: 0, };
   }
 
   async deleteDefaultBranch(pIdOrganization: String, pName: String) {
@@ -354,7 +355,53 @@ export class DatabaseManager {
       idOrganization: pIdOrganization,
       name: pName,
     });
-    return {msg:1};
+    return { msg: 1 };
+  }
+
+  async signIn(
+    pEmail: String,
+    pPassword: String
+  ): Promise<String[]> {
+    let response: String[] = [];
+
+    const member = await memberS.findOne({
+      email: pEmail,
+      password: pPassword
+    })
+
+    if (member !== null) {
+      const organization = await organizationS.findById(member.idOrganization);
+
+      const persistantBranches = await branchS.find({
+        idOrganization: member.idOrganization
+      });
+
+      let branches: (String | String[])[] = [];
+      for (const branch of persistantBranches) {
+        branches.push(branch.get("name"));
+      }
+
+      response = [
+        [organization._id,
+        organization.get("name"),
+        organization.get("legalCertificate"),
+        organization.get("web"),
+        organization.get("direction"),
+        organization.get("phone"),
+        organization.get("logoName"),
+        organization.get("country"),
+        organization.get("email"),
+          branches,],
+        member
+      ]
+
+      return response;
+
+
+    } else {
+      // Cambiar
+      return [];
+    }
   }
 
   // Organization

@@ -21,6 +21,10 @@ export class MemberManager implements ICRUD {
     return await Proxy.getInstance().deleteMember(args);
   }
 
+  public async signIn(pEmail: String, pPassword: String) {
+    return await Proxy.getInstance().signIn(pEmail, pPassword);
+  }
+
   public getMembers() {
     return Proxy.getInstance().getMembers();
   }
@@ -30,6 +34,6 @@ export class MemberManager implements ICRUD {
   }
 
   public async getMonitors() {
-    return this.getMembers().filter((member) => member.monitor);
+    return this.getMembers().filter((member) => member.role === "MONITOR");
   }
 }

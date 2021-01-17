@@ -13,7 +13,7 @@ export class FacadeAsesor {
             // Se introduce el nombre de la imagen nueva en organization.logoName
             organization.logoName = image;
             const message = await GeneralController.getInstance().signUp(ceo, organization);
-            // return res.json(message);
+            return res.json(message);
         } catch (err) {
             return res.status(500).send({
                 success: false,
@@ -42,14 +42,15 @@ export class FacadeAsesor {
     }
 
     public async createMember(req: Request, res: Response) {
-        const { name, phone, email, direction, monitor } = req.body;
+        const { name, phone, email, password, direction, role } = req.body;
         try {
             const message = await GeneralController.getInstance().createMember(
                 name,
                 phone,
                 email,
+                password,
                 direction,
-                monitor
+                role
             );
             return res.json(message);
         } catch (err) {
@@ -63,7 +64,7 @@ export class FacadeAsesor {
     }
 
     public async updateMember(req: Request, res: Response) {
-        
+
         const { id, data } = req.body;
         try {
             const message = await GeneralController.getInstance().updateMember(id, data);

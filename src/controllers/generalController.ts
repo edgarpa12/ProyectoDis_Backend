@@ -35,13 +35,14 @@ export class GeneralController {
         }
     }
 
-    public async createMember(name: String, phone: String, email: String, direction: String, monitor: boolean) {
+    public async createMember(name: String, phone: String, email: String, password: String, direction: String, role: String) {
         return await Organization.getInstance().createMember(
             name,
             phone,
             email,
+            password,
             direction,
-            monitor
+            role
         );
     }
 
@@ -82,7 +83,7 @@ export class GeneralController {
 
 
     public async updateStructure(_id: String, newName: String) {
-         const message = await Organization.getInstance().updateStructure(
+        const message = await Organization.getInstance().updateStructure(
             _id,
             newName
         );
@@ -264,13 +265,13 @@ export class GeneralController {
         return await Organization.getInstance().sendCCG(ccg, type);
     }
 
-  // from: idMember, to: idStructure
-  public async sendNews(from: String, to: String, body: String, images: String[]) {
-    const news = new News(from, to, body, images);
-    await Organization.getInstance().sendNews(news);
-  }
-  
-  public async seenNews(pIdMember:String, pSeenNews:[String]) {
-    await Organization.getInstance().seenNews(pIdMember,pSeenNews);
-  }
+    // from: idMember, to: idStructure
+    public async sendNews(from: String, to: String, body: String, images: String[]) {
+        const news = new News(from, to, body, images);
+        await Organization.getInstance().sendNews(news);
+    }
+
+    public async seenNews(pIdMember: String, pSeenNews: [String]) {
+        await Organization.getInstance().seenNews(pIdMember, pSeenNews);
+    }
 }

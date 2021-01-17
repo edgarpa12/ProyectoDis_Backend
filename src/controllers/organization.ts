@@ -1,9 +1,11 @@
 import { StructureManager } from "./structureManager";
 import { MemberManager } from "./memberManager";
 import { DatabaseManager } from "./databaseManager";
+import { Proxy } from "./proxy";
 import { CCG } from "../models/CCG";
 import { News } from "../models/news";
 import { AbstractComponent } from "../models/abstractComponent";
+import { Roles } from "../models/roles";
 
 export class Organization {
     private static instance: Organization;
@@ -16,10 +18,9 @@ export class Organization {
     logoName: String;
     country: String;
     email: String;
-    password: String;
     structureM: StructureManager;
     memberM: MemberManager;
-    databaseM: DatabaseManager;
+    proxy: Proxy;
     branches: String[];
 
     private constructor(
@@ -32,7 +33,6 @@ export class Organization {
         pLogoName: String = "",
         pCountry: String = "",
         pEmail: String = "",
-        pPassword: String = "",
         pBranches: String[] = []
     ) {
         this.id = pId;
@@ -44,10 +44,9 @@ export class Organization {
         this.logoName = pLogoName;
         this.country = pCountry;
         this.email = pEmail;
-        this.password = pPassword;
         this.structureM = new StructureManager();
         this.memberM = new MemberManager();
-        this.databaseM = new DatabaseManager();
+        this.proxy = Proxy.getInstance();
         this.branches = pBranches;
     }
 
@@ -58,12 +57,47 @@ export class Organization {
         return Organization.instance;
     }
 
+    // Organization Methods
+
     public async updateOrganization(pIdOrganization: String, pNewData: Object) {
-        return await this.databaseM.updateOrganization(pIdOrganization, pNewData);
+        return await this.proxy.updateOrganization(pIdOrganization, pNewData);
     }
 
     public async deleteOrganization(pIdOrganization: String) {
-        return await this.databaseM.removeOrganization(pIdOrganization);
+        return await this.proxy.deleteOrganization(pIdOrganization);
+    }
+
+    public async getDefaultBranches() {
+        this.branches = await this.proxy.getDefaultBranches(this.id);
+        return this.branches;
+    }
+
+    //CATALOGO
+
+    public async addDefaultBranch(pIdOrganization: String, pName: String) {
+        const responseDB = await this.proxy.addDefaultBranch(
+            pIdOrganization,
+            pName
+        );
+
+        return responseDB;
+    }
+
+    public async updateDefaultBranch(pOldName: String, pName: String) {
+        const responseDB = await this.proxy.updateDefaultBranch(
+            this.id,
+            pOldName,
+            pName
+        );
+        return responseDB;
+    }
+
+    public async deleteDefaultBranch(pName: String) {
+        const responseDB = await this.proxy.deleteDefaultBranch(
+            this.id,
+            pName
+        );
+        return responseDB;
     }
 
     //Member Methods
@@ -73,16 +107,18 @@ export class Organization {
         pName: String,
         pPhone: String,
         pEmail: String,
+        pPassword: String,
         pDirection: String,
-        pMonitor: boolean
+        pRole: String
     ) {
         const response = await this.memberM.create(
             pName,
             this.id,
             pPhone,
             pEmail,
+            pPassword,
             pDirection,
-            pMonitor
+            pRole
         );
         return response;
     }
@@ -186,20 +222,35 @@ export class Organization {
     // }
 
     public async signUp(pCeo: any, pOrganization: any) {
-        console.log("CEO", pCeo);
-        console.log("ORGANIZATION", pOrganization);
+        const organization = await this.proxy.createOrganization(
+            pOrganization.name,
+            pOrganization.legalCertificate,
+            pOrganization.web,
+            pOrganization.direction,
+            pOrganization.phone,
+            pOrganization.logoName,
+            pOrganization.country,
+            pOrganization.email
+        );
+
+        pCeo.role = Roles[Roles.CEO];
+        const member = await this.memberM.create(pCeo.name, organization.id, pCeo.phone, pCeo.email, pCeo.password, pCeo.direction, pCeo.role);
+        return member;
     }
 
     public async signIn(email: String, password: String) {
-        const organization = await this.databaseM.validateOrganization(
-            email,
-            password
-        );
-        if (organization != []) {
-            // this.structureM.setIdOrganization(organization[0]); //Referencia al id
-            this.loadData(organization);
-            return organization;
-        }
+        // const organization = await this.databaseM.validateOrganization(
+        //     email,
+        //     password
+        // );
+        // if (organization != []) {
+        //     // this.structureM.setIdOrganization(organization[0]); //Referencia al id
+        //     this.loadData(organization);
+        //     return organization;
+        // }
+
+        return await this.memberM.signIn(email, password);
+
     }
 
     public async signOut() {
@@ -211,7 +262,6 @@ export class Organization {
         this.logoName = "";
         this.country = "";
         this.email = "";
-        this.password = "";
         return "Tudo Bem";
     }
 
@@ -224,8 +274,7 @@ export class Organization {
         this.logoName = data[5] as String;
         this.country = data[6] as String;
         this.email = data[7] as String;
-        this.password = data[8] as String;
-        this.branches = data[9] as String[];
+        this.branches = data[8] as String[];
     }
 
     public async getStructureMembers(pIds: String[]) {
@@ -251,11 +300,6 @@ export class Organization {
             this.structureM.getStructures()
         );
         return structuresXMember;
-    }
-
-    public async getDefaultBranches() {
-        this.branches = await this.databaseM.loadDefaultBranches(this.id);
-        return this.branches;
     }
 
     public async addMemberToGroup(pIdMember: String, pIds: String[]) {
@@ -307,34 +351,6 @@ export class Organization {
         return added;
     }
 
-    //CATALOGO
-
-    public async addDefaultBranch(pIdOrganization: String, pName: String) {
-        const responseDB = await this.databaseM.addDefaultBranch(
-            pIdOrganization,
-            pName
-        );
-
-        return responseDB;
-    }
-
-    public async updateDefaultBranch(pOldName: String, pName: String) {
-        const responseDB = await this.databaseM.updateDefaultBranch(
-            this.id,
-            pOldName,
-            pName
-        );
-        return responseDB;
-    }
-
-    public async deleteDefaultBranch(pName: String) {
-        const responseDB = await this.databaseM.deleteDefaultBranch(
-            this.id,
-            pName
-        );
-        return responseDB;
-    }
-
     public async getDefaultBranch() {
         return this.branches;
     }
@@ -347,9 +363,9 @@ export class Organization {
         await this.structureM.sendNews(news);
     }
 
-  public async seenNews(pIdMember:String, pSeenNews:[String]){
-    await this.structureM.seenNews(pIdMember,pSeenNews);
-  }
+    public async seenNews(pIdMember: String, pSeenNews: [String]) {
+        await this.structureM.seenNews(pIdMember, pSeenNews);
+    }
 
 
 }

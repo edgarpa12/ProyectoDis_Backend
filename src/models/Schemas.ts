@@ -9,11 +9,12 @@ memberSchema.add({
   idOrganization: { type: String, ref: "Organization", required: true },
   phone: { type: String, required: true },
   email: { type: String, required: true },
+  password: { type: String, required: true },
   direction: { type: String, required: true },
   dateBegin: { type: Date, required: true, default: new Date() },
   dateEnd: { type: Date, required: true, default: new Date() },
-  monitor: { type: Boolean, required: true },
-  status: { type: Status, required: true, default: Status.ACTIVE },
+  role: { type: String, required: true },
+  status: { type: String, required: true, default: Status[Status.ACTIVE] },
 });
 
 
@@ -31,7 +32,6 @@ const organizationSchema = new Schema();
 organizationSchema.add({
   name: { type: String, required: true },
   email: { type: String, required: true },
-  password: { type: String, required: true },
   legalCertificate: { type: String, required: true },
   web: { type: String, required: true },
   direction: { type: String, required: true },
