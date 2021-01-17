@@ -52,8 +52,8 @@ export async function registerImage(req: Request, res: Response): Promise<String
         else if (err)
           reject(err);
         // @ts-ignore
-        console.log("Files: ", req.file);
-        resolve("123");
+        // console.log("Files: ", req.file);
+        resolve(req.file.filename);
       }
     );
   });

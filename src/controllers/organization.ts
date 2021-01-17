@@ -185,9 +185,9 @@ export class Organization {
     //     );
     // }
 
-    public signUp(pCeo: any, pOrganization: any) {
-        console.log(pCeo);
-        console.log(pOrganization);
+    public async signUp(pCeo: any, pOrganization: any) {
+        console.log("CEO", pCeo);
+        console.log("ORGANIZATION", pOrganization);
     }
 
     public async signIn(email: String, password: String) {
