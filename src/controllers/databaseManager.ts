@@ -301,12 +301,13 @@ export class DatabaseManager {
     return { msg: 1 };
   }
 
-  async addBossToGroup(pIdMember: String, pIdStructure: String) {
+  async addBossToGroup(pIdMember: String, pIdStructure: String, pBossType: String) {
     //Validar no más de dos
     await structureS.updateOne(
       { _id: pIdStructure },
       { $push: { bosses: pIdMember } }
     );
+    await memberS.findByIdAndUpdate(pIdMember, { role: "BOSS" });
     let struct = await structureS.findOne({ _id: pIdStructure });
     const idParent = struct?.toJSON().parent;
     this.addMemberToGroup(pIdMember, idParent);
@@ -490,7 +491,7 @@ export class DatabaseManager {
     }
   }
 
-  async enabledCCGs(idOrganization: String, enabled: Boolean){
+  async enabledCCGs(idOrganization: String, enabled: Boolean) {
     return ccgS.findByIdAndUpdate(idOrganization, enabled);
   }
 }

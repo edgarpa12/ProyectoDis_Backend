@@ -32,8 +32,8 @@ export class Proxy implements DBInterface {
         return await this.databaseManager.removeFromGroup(pSearch, pIdStructure);
     }
 
-    public async addBossToGroup(pIdMember: String, pIdStructure: String) {
-        return await this.databaseManager.addBossToGroup(pIdMember, pIdStructure);
+    public async addBossToGroup(pIdMember: String, pIdStructure: String, pBossType: String) {
+        return await this.databaseManager.addBossToGroup(pIdMember, pIdStructure, pBossType);
     }
 
     public async loadStructures(pParent: String) {
@@ -106,7 +106,7 @@ export class Proxy implements DBInterface {
         await this.databaseManager.seenNews(pIdMember, pSeenNews);
     }
 
-    async enabledCCGs(idOrganization: String){
+    async enabledCCGs(idOrganization: String) {
         const enabled = false;
         await this.databaseManager.enabledCCGs(idOrganization, enabled);
     }

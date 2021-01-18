@@ -159,7 +159,7 @@ export class StructureManager {
     return messageM;
   }
 
-  public async addBossToGroup(pIdMember: String, pIds: String[]) {
+  public async addBossToGroup(pIdMember: String, pIds: String[], pBossType: String) {
     // let structure = await this.getOneStructure(pIds);
     const structure = await Proxy.getInstance().getStructure(pIds[pIds.length - 1]);
 
@@ -174,7 +174,8 @@ export class StructureManager {
 
     const message = Proxy.getInstance().addBossToGroup(
       pIdMember,
-      structure.id
+      structure.id,
+      pBossType
     );
     //this.loadStructures(this.idOrganization);
     return message;

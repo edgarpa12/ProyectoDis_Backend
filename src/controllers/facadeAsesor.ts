@@ -196,11 +196,12 @@ export class FacadeAsesor {
     }
 
     public async addBossToGroup(req: Request, res: Response) {
-        const { idBoss, ids } = req.body;
+        const { idBoss, ids, bossType } = req.body;
         try {
             const response = await GeneralController.getInstance().addBossToGroup(
                 idBoss,
-                ids
+                ids,
+                bossType
             );
             return res.json(response);
         } catch (err) {
@@ -299,11 +300,12 @@ export class FacadeAsesor {
     }
 
     public async addMonitorToGroup(req: Request, res: Response) {
-        const { idMonitor, ids } = req.body;
+        const { idMonitor, ids, bossType } = req.body;
         try {
             const response = await GeneralController.getInstance().addMonitorToGroup(
                 idMonitor,
-                ids
+                ids,
+                bossType
             );
             return res.json(response);
         } catch (err) {
@@ -345,8 +347,8 @@ export class FacadeAsesor {
         }
     }
 
-    public async enabledCCGs(req: Request, res: Response){
-        const {idOrganization} = req.body;
+    public async enabledCCGs(req: Request, res: Response) {
+        const { idOrganization } = req.body;
         try {
             const response = await GeneralController.getInstance().enabledCCGs(idOrganization);
             return res.json(response);

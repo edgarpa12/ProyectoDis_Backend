@@ -193,17 +193,19 @@ export class GeneralController {
         );
     }
 
-    public async addBossToGroup(idBoss: String, ids: String[]) {
+    public async addBossToGroup(idBoss: String, ids: String[], bossType: String) {
         return await Organization.getInstance().addBossToGroup(
             idBoss,
-            ids
+            ids,
+            bossType
         );
     }
 
-    public async addMonitorToGroup(idMonitor: String, ids: String[]) {
+    public async addMonitorToGroup(idMonitor: String, ids: String[], bossType: String) {
         return await Organization.getInstance().addMonitorToGroup(
             idMonitor,
-            ids
+            ids,
+            bossType
         );
     }
 
@@ -264,7 +266,7 @@ export class GeneralController {
         return await Organization.getInstance().sendCCG(ccg, type);
     }
 
-    public async enabledCCGs(idOrganization: String){
+    public async enabledCCGs(idOrganization: String) {
         return await Organization.getInstance().enabledCCGs(idOrganization);
     }
 
