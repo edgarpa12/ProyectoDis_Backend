@@ -15,6 +15,7 @@ import { News } from "../models/news";
 import { AbstractComponent } from "../models/abstractComponent";
 import { Organization } from "./organization";
 import { Roles } from "../models/roles";
+import { contentSecurityPolicy } from "helmet";
 
 export class DatabaseManager {
   //DATABASE -> MEMORY MEMBERS
@@ -490,7 +491,27 @@ export class DatabaseManager {
     }
   }
 
-  async enabledCCGs(idOrganization: String, enabled: Boolean){
-    return ccgS.findByIdAndUpdate(idOrganization, enabled);
+  async enabledCCGs(pIdOrganization: String, pEnabled: Boolean){
+
+    const ccglist = await ccgS.find({idOrganization: pIdOrganization});
+
+    for(const ccgE of ccglist){
+      if(ccgE.enabled === true){
+        console.log("hola");
+        await ccgS.findByIdAndUpdate(ccgE._id,{ enabled: pEnabled});
+      }
+    }
+    return 1;
+  }
+
+  async getAllCCGs(pidOrganization: String){
+    let ccgs: CCG[] = [];
+    const ccgF = await ccgS.find({ idOrganization: pidOrganization });
+    for(const ccg of ccgF){
+      if(ccg.enabled === true){
+        ccgs.push(ccg);
+      }
+    }
+    return ccgs;
   }
 }

@@ -277,4 +277,8 @@ export class GeneralController {
     public async seenNews(pIdMember: String, pSeenNews: [String]) {
         await Organization.getInstance().seenNews(pIdMember, pSeenNews);
     }
+
+    public async getAllCCGs(idOrganization: String){
+        return await Organization.getInstance().getAllCCGs(idOrganization);
+    }
 }

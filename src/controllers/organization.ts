@@ -22,6 +22,7 @@ export class Organization {
     memberM: MemberManager;
     proxy: Proxy;
     branches: String[];
+    ccgs: String[];
 
     private constructor(
         pId: String = "",
@@ -33,7 +34,8 @@ export class Organization {
         pLogoName: String = "",
         pCountry: String = "",
         pEmail: String = "",
-        pBranches: String[] = []
+        pBranches: String[] = [],
+        pCcgs: String[] = []
     ) {
         this.id = pId;
         this.name = pName;
@@ -48,6 +50,7 @@ export class Organization {
         this.memberM = new MemberManager();
         this.proxy = Proxy.getInstance();
         this.branches = pBranches;
+        this.ccgs = pCcgs;
     }
 
     public static getInstance() {
@@ -378,7 +381,11 @@ export class Organization {
     }
 
     public async enabledCCGs(idOrganization: String){
-        await this.proxy.enabledCCGs(idOrganization);
+        return await this.proxy.enabledCCGs(idOrganization);
+    }
+
+    public async getAllCCGs(idOrganization: String){
+        return await this.structureM.getAllCCGs(idOrganization);
     }
 
 }

@@ -226,4 +226,8 @@ export class StructureManager {
   public async seenNews(pIdMember: String, pSeenNews: [String]) {
     await Proxy.getInstance().seenNews(pIdMember, pSeenNews);
   }
+
+  public async getAllCCGs(idOrganization: String){
+    return await Proxy.getInstance().getAllCCGs(idOrganization);
+  }
 }

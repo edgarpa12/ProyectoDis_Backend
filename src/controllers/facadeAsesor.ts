@@ -346,9 +346,21 @@ export class FacadeAsesor {
     }
 
     public async enabledCCGs(req: Request, res: Response){
-        const {idOrganization} = req.body;
+        const {id} = req.body;
+        console.log(req.body);
         try {
-            const response = await GeneralController.getInstance().enabledCCGs(idOrganization);
+            const response = await GeneralController.getInstance().enabledCCGs(id);
+            return res.json(response);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    public async getAllCCGs(req: Request, res: Response) {
+        const {id} = req.body;
+        try {
+            const response = await GeneralController.getInstance().getAllCCGs(id);
+            console.log("ccg:",response);
             return res.json(response);
         } catch (err) {
             console.error(err);

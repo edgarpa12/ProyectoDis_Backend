@@ -70,7 +70,8 @@ routerStructure.post(
 routerStructure.post("/seenNews",
 facadeMiembros.seenNews);
 
-routerStructure.put("/enabledCCGs",
-facadeAsesor.enabledCCGs);
+routerStructure.put("/enabledCCGs",facadeAsesor.enabledCCGs);
+
+routerStructure.post("/getAllCCGs",facadeAsesor.getAllCCGs);
 
 export default routerStructure;
