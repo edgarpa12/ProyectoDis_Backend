@@ -20,6 +20,10 @@ export class Proxy implements DBInterface {
         return this.structures;
     }
 
+    public async getStructure(pIdStructure: String) {
+        return await this.databaseManager.getStructure(pIdStructure);
+    }
+
     public async removeFromGroup(pSearch: Object, pIdStructure: String) {
         return await this.databaseManager.removeFromGroup(pSearch, pIdStructure);
     }

@@ -356,7 +356,6 @@ export class Organization {
     }
 
     public async addMonitorToGroup(pIdMember: String, pIds: String[]) {
-        const update = await this.memberM.update(pIdMember, { monitor: true });
         const added = await this.addBossToGroup(pIdMember, pIds);
         return added;
     }

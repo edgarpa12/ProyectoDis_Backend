@@ -106,7 +106,6 @@ export class FacadeAsesor {
     }
 
     public async createStructure(req: Request, res: Response) {
-        console.log(req.body);
         const { name, idParent, groupNumber } = req.body;
         try {
             const message = await GeneralController.getInstance().createStructure(

@@ -120,17 +120,17 @@ export class StructureManager {
     for (let index = 0; index < branch.groups.length; index++) {
       group = branch.groups[index];
       if (this.findMember(pIdMember, group.members) != null) {
-        return { msg: 0};
+        return { msg: 0 };
       }
     }
     await Proxy.getInstance().addMemberToGroup(pIdMember, group.id);
-    return { msg: 1};
+    return { msg: 1 };
   }
 
   public async removeMemberFromStructure(pIdMember: String, pIdGroup: String) {
     let search = { members: pIdMember };
     const message = Proxy.getInstance().removeFromGroup(search, pIdGroup);
-    
+
     return message;
   }
 
@@ -148,7 +148,9 @@ export class StructureManager {
   }
 
   public async addBossToGroup(pIdMember: String, pIds: String[]) {
-    let structure = await this.getOneStructure(pIds);
+    // let structure = await this.getOneStructure(pIds);
+    const structure = await Proxy.getInstance().getStructure(pIds[2]);
+
     //Valida si ya es un jefe
     if (this.findMember(pIdMember, structure.bosses) != null) {
       return { message: "This member is already a boss for this structure" };
@@ -157,6 +159,7 @@ export class StructureManager {
     if (structure.bosses.length >= 2) {
       return { message: "Max of bosses is 2" };
     }
+
     const message = Proxy.getInstance().addBossToGroup(
       pIdMember,
       structure.id

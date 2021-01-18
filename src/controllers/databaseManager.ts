@@ -179,18 +179,16 @@ export class DatabaseManager {
         parent: pParent,
         groupNumber: pGroupNumber,
       });
-      await persistantStructure.save();
-      return { msg: 1 };
+      return await persistantStructure.save();
+      // return { msg: 1 };
     }
-    return { msg: 0 };
+    // return { msg: 0 };
+    return 0;
   }
 
   //DB MANAGER: OBTIENE una structure en la  base de datos
-  async getStructure(pId: String, pParent: String) {
-    let persistantStructure = await structureS.findOne({
-      id: pId,
-      parent: pParent,
-    });
+  async getStructure(pId: String) {
+    let persistantStructure = await structureS.findById(pId);
     return persistantStructure;
   }
 
