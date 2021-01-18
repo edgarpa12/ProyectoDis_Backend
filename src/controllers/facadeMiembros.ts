@@ -94,6 +94,8 @@ export class FacadeMiembros {
     try {
       const { from, to, body } = req.body;
       const images = await saveImages(req, res);
+      console.log(images);
+      console.log(from, to, body, req.body);
       await GeneralController.getInstance().sendNews(from, to, body, images);
       return res.json("La llama que llama");
       // const { from, to, body, images } = req.body;

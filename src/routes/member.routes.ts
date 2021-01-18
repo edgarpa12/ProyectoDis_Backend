@@ -31,4 +31,6 @@ routerMember.get('/getStructuresXMember', facadeMiembros.getStructuresXMember);
 
 routerMember.post('/sendCCG', facadeMiembros.sendCCG);
 
+routerMember.post('/sendNews', facadeMiembros.sendNews);
+
 export default routerMember;
