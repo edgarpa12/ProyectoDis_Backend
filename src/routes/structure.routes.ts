@@ -69,4 +69,8 @@ routerStructure.post(
 
 routerStructure.post("/seenNews",
 facadeMiembros.seenNews);
+
+routerStructure.put("/enabledCCGs",
+facadeAsesor.enabledCCGs);
+
 export default routerStructure;

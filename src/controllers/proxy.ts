@@ -106,6 +106,11 @@ export class Proxy implements DBInterface {
         await this.databaseManager.seenNews(pIdMember, pSeenNews);
     }
 
+    async enabledCCGs(idOrganization: String){
+        const enabled = false;
+        await this.databaseManager.enabledCCGs(idOrganization, enabled);
+    }
+
 
     //////////// Organization ////////////
 
