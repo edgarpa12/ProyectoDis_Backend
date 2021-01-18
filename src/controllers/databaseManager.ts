@@ -4,20 +4,28 @@ import {
   memberS,
   structureS,
   organizationS,
-  BranchSchema,
-  branchSchema,
+  branchS,
+  ccgS,
+  newsS,
+  newsHistoryS,
 } from "../Models/Schemas";
 import { Document } from "mongoose";
-import { publicDecrypt } from "crypto";
+import { CCG } from "../models/CCG";
+import { News } from "../models/news";
+import { AbstractComponent } from "../models/abstractComponent";
+import { Organization } from "./organization";
+import { Roles } from "../models/roles";
+import { contentSecurityPolicy } from "helmet";
 
 export class DatabaseManager {
   //DATABASE -> MEMORY MEMBERS
   //DB MANAGER: Cargar Miembros a memoria
   async loadMembers(pIdOrganization: String): Promise<Member[]> {
-    let membersFromDB = await memberS.find({ "idOrganization": pIdOrganization });
+    let membersFromDB = await memberS.find({ idOrganization: pIdOrganization, role: { $ne: "CEO" } });
     let members: Member[] = await this.getListMembers(membersFromDB);
     return members;
   }
+
   //DB MANAGER: Tranforma los documentos de la BD a objetos MIEMBROS
   async getListMembers(documents: Document[]) {
     let members: Member[] = [];
@@ -28,10 +36,11 @@ export class DatabaseManager {
         document.get("name"),
         document.get("phone"),
         document.get("email"),
+        document.get("password"),
         document.get("direction"),
         document.get("dateBegin"),
         document.get("dateEnd"),
-        document.get("monitor"),
+        document.get("role"),
         document.get("status")
       );
       members.push(member);
@@ -59,58 +68,88 @@ export class DatabaseManager {
     pIdOrganization: String,
     pPhone: String,
     pEmail: String,
-    pDirection: String
+    pPassword: String,
+    pDirection: String,
+    pRole: String
   ) {
-    let persistantMember = new memberS({
-      name: pName,
-      idOrganization: pIdOrganization,
-      phone: pPhone,
-      email: pEmail,
-      direction: pDirection,
-    });
-    const message = await persistantMember.save();
-    return message;
+    if (await memberS.exists({ email: pEmail })) {
+      return 0;
+    } else {
+      const persistantMember = new memberS({
+        name: pName,
+        idOrganization: pIdOrganization,
+        phone: pPhone,
+        email: pEmail,
+        password: pPassword,
+        direction: pDirection,
+        role: pRole,
+      });
+      return await persistantMember.save();
+    }
   }
 
   //DB MANAGER: MODIFICAR un miembro en la base de datos
   async updateMember(pId: String, pUpdate: Object) {
-    const message = await memberS.findByIdAndUpdate(pId, pUpdate);
-    return message;
+    console.log(pUpdate);
+    await memberS.findByIdAndUpdate(pId, pUpdate);
+    return { msg: 1 };
   }
 
   //DB MANAGER: ELIMINAR un miembro en la base de datos
   async deleteMember(pId: String) {
-    const messsage = await memberS.findByIdAndDelete(pId);
-    return messsage;
+    await memberS.findByIdAndDelete(pId);
+    return { msg: 1 };
   }
 
   //DATABASE -> MEMORY
-  async loadStructures(pParent: String, pIdOrganization: String): Promise<CompositeStructure[]> {
+  async loadStructures(
+    pParent: String,
+    pIdOrganization: String
+  ): Promise<CompositeStructure[]> {
     let memoryMembers = await this.loadMembers(pIdOrganization);
     let zones: Document[] = await this.getStructures(pParent);
-    let structures: CompositeStructure[] = await this.getListStructure(zones, pIdOrganization, memoryMembers);
+    let structures: CompositeStructure[] = await this.getListStructure(
+      zones,
+      pIdOrganization,
+      memoryMembers
+    );
 
     return structures;
   }
 
   async loadBranches(pIdOrganization: String): Promise<String[]> {
-    let branchesFromDB = await BranchSchema.find({ "idOrganization": pIdOrganization });
+    let branchesFromDB = await branchS.find({
+      idOrganization: pIdOrganization,
+    });
     let branches: String[] = [];
     for (const branch of branchesFromDB) {
-      branches.push(branch.get('name'))
+      branches.push(branch.get("name"));
     }
     return branches;
   }
 
-
-  async getListStructure(data: Document[], pIdOrganization: String, pMemoryMembers: Member[]): Promise<CompositeStructure[]> {
+  async getListStructure(
+    data: Document[],
+    pIdOrganization: String,
+    pMemoryMembers: Member[]
+  ): Promise<CompositeStructure[]> {
     const structures: CompositeStructure[] = [];
     if (data != null || data != []) {
       for (let index = 0; index < data.length; index++) {
         let children = await this.getStructures(data[index]._id);
-        let groups = await this.getListStructure(children, pIdOrganization, pMemoryMembers);
-        let members = await this.findMembers(data[index].get("members"), pMemoryMembers);
-        let bosses = await this.findMembers(data[index].get("bosses"), pMemoryMembers);
+        let groups = await this.getListStructure(
+          children,
+          pIdOrganization,
+          pMemoryMembers
+        );
+        let members = await this.findMembers(
+          data[index].get("members"),
+          pMemoryMembers
+        );
+        let bosses = await this.findMembers(
+          data[index].get("bosses"),
+          pMemoryMembers
+        );
         let objectComposite = new CompositeStructure(
           data[index].id,
           data[index].get("name"),
@@ -124,32 +163,38 @@ export class DatabaseManager {
     }
     return structures;
   }
+
   //END DATABASE -> MEMORY
 
   //DB MANAGER: STRUCTURES METHODS
   //DB MANAGER: CREA una structure en la  base de datos
   async createStructure(pName: String, pParent: String, pGroupNumber: String) {
-    let searchedStrucutre = await structureS.find({ name: pName, parent: pParent });
+    let searchedStrucutre = await structureS.find({
+      name: pName,
+      parent: pParent,
+    });
     //Valida si no existe una estructura con ese nombre
     if (searchedStrucutre.length == 0) {
       let persistantStructure = new structureS({
         name: pName,
         parent: pParent,
-        groupNumber: pGroupNumber
+        groupNumber: pGroupNumber,
       });
-      const responseDB = await persistantStructure.save();
-      return responseDB;
+      return await persistantStructure.save();
+      // return { msg: 1 };
     }
-    return { message: "Already exists a structure with this name: " + pName };
+    // return { msg: 0 };
+    return 0;
   }
 
   //DB MANAGER: OBTIENE una structure en la  base de datos
-  async getStructure(pId: String, pParent: String) {
-    let persistantStructure = await structureS.findOne({
-      id: pId,
-      parent: pParent,
-    });
-    return persistantStructure;
+  async getStructure(pId: String) {
+    return await structureS.findById(pId);
+  }
+
+  // DB MANAGER: Obtiene todos los hijos de una estructura
+  async getStructureChildren(pIdParent: String) {
+    return await structureS.find({ "parent": pIdParent });
   }
 
   //DB MANAGER: OBTIENE una structure en la  base de datos
@@ -163,42 +208,42 @@ export class DatabaseManager {
     let searchedStructure = structureS.find({ name: pNewName });
     //Valida si no existe una estructura con ese nombre
     if ((await searchedStructure).length == 0) {
-      const responseDB = await structureS.findByIdAndUpdate(pId, {
+      await structureS.findByIdAndUpdate(pId, {
         name: pNewName,
       });
-      return responseDB;
+      return { msg: 1 };
     }
-    return {
-      message: "Already exists a structure with this name: " + pNewName,
-    };
+    return { msg: 0 };
   }
 
   //DB MANAGER: ELIMINA una structure en la  base de datos
   async deleteStructure(pIdParent: String) {
     const data = await this.getStructures(pIdParent);
     if (data != []) {
-      data.forEach((structure) => {
+      data.forEach((structure: any) => {
         return this.deleteStructure(structure._id);
       });
     }
-    const message = await structureS.findByIdAndDelete(pIdParent);
-    return message;
+    //No hay validacion
+    await structureS.findByIdAndDelete(pIdParent);
+    return { msg: 1 };
   }
 
+  ///REVISAR ESTO
   //DB MANAGER: ELIMINA una structure en la  base de datos
   async removeBoss(pIdMember: String, pIdParent: String) {
     const structures = await this.getStructures(pIdParent);
     if (structures != []) {
-      structures.forEach((structure) => {
+      structures.forEach((structure: any) => {
         return this.deleteStructure(structure._id);
       });
     }
   }
 
   async loadDefaultBranches(pIdOrganization: String) {
-    const branches = await BranchSchema.find({
-      idOrganization: pIdOrganization
-    })
+    const branches = await branchS.find({
+      idOrganization: pIdOrganization,
+    });
     let defaultBranches: String[] = [];
     for (const document of branches) {
       defaultBranches.push(document.get("name"));
@@ -223,8 +268,7 @@ export class DatabaseManager {
     pPhone: String,
     pLogoName: String,
     pCountry: String,
-    pEmail: String,
-    pPassword: String
+    pEmail: String
   ) {
     const persistantOrganization = new organizationS({
       name: pName,
@@ -235,7 +279,6 @@ export class DatabaseManager {
       logoName: pLogoName,
       country: pCountry,
       email: pEmail,
-      password: pPassword,
       branches: [],
     });
     const message = await persistantOrganization.save();
@@ -246,82 +289,125 @@ export class DatabaseManager {
 
   //OTHER FUNCTIONS
   async addMemberToGroup(pIdMember: String, pIdStructure: String) {
-    const message = await structureS.findByIdAndUpdate(pIdStructure, {
+    await structureS.findByIdAndUpdate(pIdStructure, {
       $push: { members: pIdMember },
     });
-    return { message: "Usuario Añadido" };
+    return { msg: 1 };
   }
 
-  async removeToGroup(pSearch: Object, pIdStructure: String) {
-    const deleted = await structureS.findByIdAndUpdate(
-      pIdStructure,
-      { $pull: pSearch }
-    );
-    return { message: "Usuario Eliminado" };
+  async removeFromGroup(pSearch: Object, pIdStructure: String) {
+    const deleted = await structureS.findByIdAndUpdate(pIdStructure, {
+      $pull: pSearch,
+    });
+    return { msg: 1 };
   }
 
-  async addBossToGroup(pIdMember: String, pIdStructure: String) {
+  async addBossToGroup(pIdMember: String, pIdStructure: String, pBossType: String) {
     //Validar no más de dos
-    const message = await structureS.updateOne(
+    await structureS.updateOne(
       { _id: pIdStructure },
       { $push: { bosses: pIdMember } }
     );
+    await memberS.findByIdAndUpdate(pIdMember, { role: "BOSS" });
     let struct = await structureS.findOne({ _id: pIdStructure });
     const idParent = struct?.toJSON().parent;
     this.addMemberToGroup(pIdMember, idParent);
-    return message;
+    return { msg: 1 };
   }
 
   //Catalogo
   async addDefaultBranch(pIdOrganization: String, pName: String) {
-    let searchedBranch = BranchSchema.find({
+    let searchedBranch = branchS.find({
       idOrganization: pIdOrganization,
       name: pName,
     });
     //Valida si no existe una estructura con ese nombre
     if ((await searchedBranch).length == 0) {
-      const persistantDefaultBranch = new BranchSchema({
+      const persistantDefaultBranch = new branchS({
         idOrganization: pIdOrganization,
         name: pName,
       });
-      const message = await persistantDefaultBranch.save();
-      return message;
+      await persistantDefaultBranch.save();
+      return { msg: 1 };
     }
     return {
-      message: "Already exists a structure with this name: " + pName,
+      msg: 0,
     };
   }
 
-  async updateDefaultBranch(pIdOrganization: String, pOldName: String, pName: String) {
-    let searchedBranch = BranchSchema.find({
+  async updateDefaultBranch(
+    pIdOrganization: String,
+    pOldName: String,
+    pName: String
+  ) {
+    let searchedBranch = branchS.find({
       idOrganization: pIdOrganization,
       name: pName,
     });
     //Valida si no existe una estructura con ese nombre
     if ((await searchedBranch).length == 0) {
-      const persistantDefaultBranch = await BranchSchema.update(
+      await branchS.update(
         { idOrganization: pIdOrganization, name: pOldName },
         { name: pName }
       );
-      const message = persistantDefaultBranch;
-      return message;
+      return { msg: 1 };
     }
-    return {
-      message: "Already exists a structure with this name: " + pName,
-    };
+    return { msg: 0, };
   }
 
   async deleteDefaultBranch(pIdOrganization: String, pName: String) {
-    const message = await BranchSchema.findOneAndDelete({
+    await branchS.findOneAndDelete({
       idOrganization: pIdOrganization,
       name: pName,
     });
-    return message;
+    return { msg: 1 };
   }
 
+  async signIn(
+    pEmail: String,
+    pPassword: String
+  ): Promise<String[]> {
+    let response: String[] = [];
 
-  // Organization 
+    const member = await memberS.findOne({
+      email: pEmail,
+      password: pPassword
+    })
 
+    if (member !== null) {
+      const organization = await organizationS.findById(member.idOrganization);
+
+      const persistantBranches = await branchS.find({
+        idOrganization: member.idOrganization
+      });
+
+      let branches: (String | String[])[] = [];
+      for (const branch of persistantBranches) {
+        branches.push(branch.get("name"));
+      }
+
+      response = [
+        [organization._id,
+        organization.get("name"),
+        organization.get("legalCertificate"),
+        organization.get("web"),
+        organization.get("direction"),
+        organization.get("phone"),
+        organization.get("logoName"),
+        organization.get("country"),
+        organization.get("email"),
+          branches,],
+        member
+      ]
+    } else {
+      // Que asco pero sino no lo agarraba
+      response = ["0"]
+    }
+
+    return response;
+  }
+
+  // Organization
   async validateOrganization(
     pEmail: String,
     pPassword: String
@@ -332,7 +418,7 @@ export class DatabaseManager {
       password: pPassword,
     });
     if (organization != null) {
-      const persistantBranches = await BranchSchema.find({
+      const persistantBranches = await branchS.find({
         idOrganization: organization._id,
       });
       let branches: (String | String[])[] = [];
@@ -358,12 +444,100 @@ export class DatabaseManager {
   }
 
   async updateOrganization(pIdOrganization: String, pNewData: Object) {
-    const message = await organizationS.findByIdAndUpdate(pIdOrganization, pNewData);
-    return message;
+    return organizationS.findByIdAndUpdate(pIdOrganization, pNewData);
   }
 
   async removeOrganization(pIdOrganization: String) {
-    const message = await organizationS.findOneAndDelete(pIdOrganization);
-    return message;
+    return organizationS.findOneAndDelete(pIdOrganization);
+  }
+
+  async saveCCG(pCcg: CCG) {
+    const persistantCCG = new ccgS({
+      idOrganization: Organization.getInstance().id,
+      from: pCcg.from,
+      body: pCcg.body,
+      type: pCcg.type,
+    });
+    await persistantCCG.save();
+    return { msg: 1 }
+  }
+
+  async saveNews(pNews: News, component: AbstractComponent) {
+    const persistantNews = new newsS({
+      from: pNews.from,
+      to: component.id,
+      body: pNews.body,
+      images: pNews.images,
+    });
+    await persistantNews.save();
+    return { msg: 1 }
+  }
+
+  async seenNews(pIdMember: String, pNews: String) {
+    let searchedMember = newsHistoryS.find({ member: pIdMember });
+    //Valida si no existe una estructura con ese nombre
+    if ((await searchedMember).length == 0) {
+      const persistantNewsHistory = new newsHistoryS({
+        member: pIdMember,
+        seenNews: pNews,
+      });
+      await persistantNewsHistory.save();
+      return { msg: 1 }
+    } else {
+      await newsHistoryS.updateOne(
+        { member: pIdMember },
+        { $push: { seenNews: pNews } }
+      );
+      return { msg: 1 }
+    }
+  }
+
+  async enabledCCGs(pIdOrganization: String, pEnabled: Boolean){
+
+    const ccglist = await ccgS.find({idOrganization: pIdOrganization});
+
+    for(const ccgE of ccglist){
+      if(ccgE.enabled === true){
+        console.log("hola");
+        await ccgS.findByIdAndUpdate(ccgE._id,{ enabled: pEnabled});
+      }
+    }
+    return 1;
+  }
+
+  async getAllCCGs(pidOrganization: String){
+    let ccgs: CCG[] = [];
+    const ccgF = await ccgS.find({ idOrganization: pidOrganization });
+    for(const ccg of ccgF){
+      if(ccg.enabled === true){
+        ccgs.push(ccg);
+      }
+    }
+    return ccgs;
+  }
+
+  async getPath(structureId: any) {
+    let structure = await this.getStructure(structureId);
+    const path: any[] = [];
+    do {
+      path.push({id: structure._id, name: structure.name});
+      structure = await this.getStructure(structure.parent);
+    } while(structure);
+    return path.reverse();
+  }
+
+  async getNews(structureId: any) {
+    const news = await newsS.find({ to: structureId });
+    for (const news1 of news) {
+      news1.from = (await memberS.findById(news1.from)).name;
+    }
+    return news;
+  }
+
+  async getSeenNews(idMember: string) {
+    const seenNews = await newsHistoryS.find({member: idMember});
+    if (seenNews && seenNews.length > 0)
+      return seenNews[0].seenNews;
+    return [];
   }
 }

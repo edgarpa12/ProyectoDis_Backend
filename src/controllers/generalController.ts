@@ -1,404 +1,298 @@
 import { Request, Response } from "express";
 import { Organization } from "./organization";
+import { CCG } from "../models/CCG";
+import GratitudeStrategy from "./GratitudeStrategy";
+import OfferingStrategy from "./OfferingStrategy";
+import PetitionStrategy from "./PetitionStrategy";
+import { News } from "../models/news";
+import { AbstractComponent } from "../models/abstractComponent";
 
 export class GeneralController {
-  private static instance: GeneralController;
+    private static instance: GeneralController;
 
-  public static getInstance() {
-    if (!GeneralController.instance) {
-      GeneralController.instance = new GeneralController();
+    public static getInstance() {
+        if (!GeneralController.instance) {
+            GeneralController.instance = new GeneralController();
+        }
+        return GeneralController.instance;
     }
-    return GeneralController.instance;
-  }
 
-  //Members Functions
-  async getMembers(req: Request, res: Response) {
-    try {
-      const message = await Organization.getInstance().getMembers();
-      return res.json(message);
-    } catch (err) {
-      return res.status(500).send({
-        success: false,
-        message: err.toString(),
-        data: null,
-      });
+    //Members Functions
+    public async getMembers() {
+        try {
+            return await Organization.getInstance().getMembers();
+        } catch (err) {
+            console.error(err);
+        }
     }
-  }
 
-  // Recibe id del miembro a buscar
-  public async getMember(req: Request, res: Response) {
-    const { idUser } = req.body;
-    try {
-      const response = await Organization.getInstance().readMember(idUser);
-      return res.json(response);
-    } catch (err) {
-      return res.status(500).send({
-        success: false,
-        message: err.toString(),
-        data: null,
-      });
+    // Recibe id del miembro a buscar
+    public async getMember(idUser: String) {
+        try {
+            return await Organization.getInstance().readMember(idUser);
+        } catch (err) {
+            console.error(err);
+        }
     }
-  }
 
-  public async createMember(req: Request, res: Response) {
-    const { name, phone, email, direction } = req.body;
-    try {
-      const message = await Organization.getInstance().createMember(
-        name,
-        phone,
-        email,
-        direction
-      );
-      return res.json(message);
-    } catch (err) {
-      return res.status(500).send({
-        success: false,
-        message: err.toString(),
-        data: null,
-      });
+    public async createMember(name: String, phone: String, email: String, password: String, direction: String, role: String) {
+        return await Organization.getInstance().createMember(
+            name,
+            phone,
+            email,
+            password,
+            direction,
+            role
+        );
     }
-  }
 
-  public async updateMember(req: Request, res: Response) {
-    const { id, newData } = req.body;
-    try {
-      const message = await Organization.getInstance().updateMember(id, newData);
-      return res.json(message);
-    } catch (err) {
-      return res.status(500).send({
-        success: false,
-        message: err.toString(),
-        data: null,
-      });
+    public async updateMember(id: String, newData: Object) {
+        return await Organization.getInstance().updateMember(id, newData);
     }
-  }
 
-  public async deleteMember(req: Request, res: Response) {
-    const { id } = req.body;
-    try {
-      const message = await Organization.getInstance().deleteMember(id);
-      return res.json(message);
-    } catch (err) {
-      return res.status(500).send({
-        success: false,
-        message: err.toString(),
-        data: null,
-      });
+    public async deleteMember(id: String) {
+        try {
+            return await Organization.getInstance().deleteMember(id);
+        } catch (err) {
+            console.error(err);
+        }
     }
-  }
 
-  public async changeGroup(req: Request, res: Response) {
-    const { idUser, idOldGroup, ids } = req.body;
-    try {
-      const response = await Organization.getInstance().changeGroup(
-        idUser,
-        idOldGroup,
-        ids
-      );
-      return res.json(response);
-    } catch (err) {
-      return res.status(500).send({
-        success: false,
-        message: err.toString(),
-        data: null,
-      });
+    public async changeGroup(idUser: String, idOldGroup: String,
+        ids: String[]) {
+        return await Organization.getInstance().changeGroup(
+            idUser,
+            idOldGroup,
+            ids
+        );
     }
-  }
 
-  public async getMonitors(req: Request, res: Response) {
-    try {
-      const response = await Organization.getInstance().getMonitors();
-      return res.json(response);
-    } catch (err) { }
-  }
-
-  // Structure
-  public async createStructure(req: Request, res: Response) {
-    const { name, idParent, groupNumber } = req.body;
-    try {
-      const message = await Organization.getInstance().createStructure(
-        name,
-        idParent,
-        groupNumber
-      );
-      return res.json(message);
-    } catch (err) {
-      return res.status(500).send({
-        success: false,
-        message: err.toString(),
-        data: null,
-      });
+    public async getMonitors() {
+        return await Organization.getInstance().getMonitors();
     }
-  }
 
-
-  public async updateStructure(req: Request, res: Response) {
-    const { _id, newName } = req.body;
-    try {
-      const message = await Organization.getInstance().updateStructure(
-        _id,
-        newName
-      );
-      return res.json(message);
-    } catch (err) {
-      return res.status(500).send({
-        success: false,
-        message: err.toString(),
-        data: null,
-      });
+    // Structure
+    public async createStructure(name: String, idParent: String, groupNumber: String) {
+        const message = await Organization.getInstance().createStructure(
+            name,
+            idParent,
+            groupNumber
+        );
+        return message;
     }
-  }
 
-  public async deleteStructure(req: Request, res: Response) {
-    const { id } = req.body;
-    try {
-      const message = await Organization.getInstance().deleteStructure(id);
-      return res.json(message);
-    } catch (err) {
-      return res.status(500).send({
-        success: false,
-        message: err.toString(),
-        data: null,
-      });
+
+    public async updateStructure(_id: String, newName: String) {
+        const message = await Organization.getInstance().updateStructure(
+            _id,
+            newName
+        );
+        return message;
     }
-  }
 
-  public async getStructures(req: Request, res: Response) {
-    try {
-      const response = await Organization.getInstance().getStructures();
-      return res.json(response);
-    } catch (err) { }
-  }
-
-  public async getDefaultBranches(req: Request, res: Response) {
-    try {
-      const response = await Organization.getInstance().getDefaultBranches();
-      return res.json(response);
-    } catch (err) { }
-  }
-
-  public async getLevelByParent(req: Request, res: Response) {
-    try {
-      const idParent = req.body.parent;
-      const response = await Organization.getInstance().findLevel(idParent);
-      return res.json(response);
-    } catch (err) { }
-  }
-
-  public async signIn(req: Request, res: Response) {
-    const { email, password } = req.body;
-    try {
-      const message = await Organization.getInstance().signIn(email, password);
-      return res.json(message);
-    } catch (err) {
-      return res.status(500).send({
-        success: false,
-        message: err.toString(),
-        data: null,
-      });
+    public async deleteStructure(id: String) {
+        return await Organization.getInstance().deleteStructure(id);
     }
-  }
 
-  public async signUp(req: Request, res: Response) {
-    const {
-      name,
-      legalCertificate,
-      web,
-      direction,
-      phone,
-      logoName,
-      country,
-      email,
-      password,
-    } = req.body;
-    try {
-      const message = await Organization.getInstance().signUp(
-        name,
-        legalCertificate,
-        web,
-        direction,
-        phone,
-        logoName,
-        country,
-        email,
-        password
-      );
-      return res.json(message);
-    } catch (err) {
-      return res.status(500).send({
-        success: false,
-        message: err.toString(),
-        data: null,
-      });
+    public async getStructures() {
+        return await Organization.getInstance().getStructures();
     }
-  }
 
-  public signOut(req: Request, res: Response) {
-    try {
-      const message = Organization.getInstance().signOut();
-      return res.json(message);
-    } catch (err) {
-      return res.status(500).send({
-        success: false,
-        message: err.toString(),
-        data: null,
-      });
+    public async getDefaultBranches() {
+        return await Organization.getInstance().getDefaultBranches();
     }
-  }
-  public async getStructureMembers(req: Request, res: Response) {
-    try {
-      const ids = req.body.ids;
-      const response = await Organization.getInstance().getStructureMembers(
-        ids
-      );
-      return res.json(response);
-    } catch (err) { }
-  }
 
-  public async getStructureBosses(req: Request, res: Response) {
-    try {
-      const ids = req.body.ids;
-      const response = await Organization.getInstance().getStructureBosses(ids);
-      return res.json(response);
-    } catch (err) { }
-  }
+    public async getLevelByParent(idParent: String) {
+        return await Organization.getInstance().findLevel(idParent);
+    }
 
-  public async getStructureGroups(req: Request, res: Response) {
-    try {
-      const ids = req.body.ids;
-      const response = await Organization.getInstance().getStructureGroups(ids);
-      return res.json(response);
-    } catch (err) { }
-  }
+    public async signIn(req: Request, res: Response) {
+        const { email, password } = req.body;
+        try {
+            const message = await Organization.getInstance().signIn(email, password);
+            return res.json(message);
+        } catch (err) {
+            return res.status(500).send({
+                success: false,
+                message: err.toString(),
+                data: null,
+            });
+        }
+    }
+    // public async signUp(req: Request, res: Response) {
+    //     const {
+    //         name,
+    //         legalCertificate,
+    //         web,
+    //         direction,
+    //         phone,
+    //         logoName,
+    //         country,
+    //         email,
+    //         password,
+    //     } = req.body;
+    //     try {
+    //         const message = await Organization.getInstance().signUp(
+    //             name,
+    //             legalCertificate,
+    //             web,
+    //             direction,
+    //             phone,
+    //             logoName,
+    //             country,
+    //             email,
+    //             password
+    //         );
+    //         return res.json(message);
+    //     } catch (err) {
+    //         return res.status(500).send({
+    //             success: false,
+    //             message: err.toString(),
+    //             data: null,
+    //         });
+    //     }
+    // }
 
-  public async getStructuresXMember(req: Request, res: Response) {
-    try {
-      const { idUser } = req.body;
-      const response = await Organization.getInstance().getStructuresXMember(
-        idUser
-      );
-      return res.json(response);
-    } catch (err) { }
-  }
+    public async signUp(ceo: any, organization: any) {
+        return await Organization.getInstance().signUp(ceo, organization);
+    }
 
-  public async addMemberToGroup(req: Request, res: Response) {
-    try {
-      const { idMember, ids } = req.body;
-      const response = await Organization.getInstance().addMemberToGroup(
-        idMember,
-        ids
-      );
-      return res.json(response);
-    } catch (err) { }
-  }
+    public signOut(req: Request, res: Response) {
+        try {
+            const message = Organization.getInstance().signOut();
+            return res.json(message);
+        } catch (err) {
+            return res.status(500).send({
+                success: false,
+                message: err.toString(),
+                data: null,
+            });
+        }
+    }
 
-  public async addBossToGroup(req: Request, res: Response) {
-    try {
-      const { idBoss, ids } = req.body;
-      const response = await Organization.getInstance().addBossToGroup(
-        idBoss,
-        ids
-      );
-      return res.json(response);
-    } catch (err) { }
-  }
+    public async getStructureMembers(ids: String[]) {
+        return await Organization.getInstance().getStructureMembers(ids);
+    }
 
-  public async addMonitorToGroup(req: Request, res: Response) {
-    try {
-      const { idMonitor, ids } = req.body;
-      const response = await Organization.getInstance().addMonitorToGroup(
-        idMonitor,
-        ids
-      );
-      return res.json(response);
-    } catch (err) { }
-  }
+    public async getStructureBosses(ids: String[]) {
+        return await Organization.getInstance().getStructureBosses(ids);
+    }
 
-  public async removeMemberFromStructure(req: Request, res: Response) {
-    try {
-      const { idMember, idGroup } = req.body;
-      const response = await Organization.getInstance().removeMemberFromStructure(
-        idMember,
-        idGroup
-      );
-      return res.json(response);
-    } catch (err) { }
-  }
+    public async getStructureGroups(ids: String[]) {
+        return await Organization.getInstance().getStructureGroups(ids);
+    }
 
-  public async removeBossFromStructure(req: Request, res: Response) {
-    try {
-      const { idMember, idBranch, idGroup } = req.body;
-      const response = await Organization.getInstance().removeBossFromStructure(
-        idMember,
-        idBranch,
-        idGroup
-      );
-      return res.json(response);
-    } catch (err) { }
-  }
+    public async getStructuresXMember(idUser: String, includeBosses: boolean) {
+        return await Organization.getInstance().getStructuresXMember(idUser, includeBosses);
+    }
 
-  public async removeMonitorFromGroup(req: Request, res: Response) {
-    try {
-      const { idMember, idBranch, idGroup } = req.body;
-      const response = await Organization.getInstance().removeMonitorFromGroup(
-        idMember,
-        idBranch,
-        idGroup
-      );
-      return res.json(response);
-    } catch (err) { }
-  }
+    public async addMemberToGroup(idMember: String, ids: String[]) {
+        return await Organization.getInstance().addMemberToGroup(
+            idMember,
+            ids
+        );
+    }
 
-  //CATALOGO
-  public async addDefaultBranch(req: Request, res: Response) {
-    try {
-      const { idOrganization, name } = req.body;
-      const response = await Organization.getInstance().addDefaultBranch(
-        idOrganization,
-        name
-      );
-      return res.json(response);
-    } catch (err) { }
-  }
+    public async addBossToGroup(idBoss: String, ids: String[], bossType: String) {
+        return await Organization.getInstance().addBossToGroup(
+            idBoss,
+            ids,
+            bossType
+        );
+    }
 
-  public async updateDefaultBranch(req: Request, res: Response) {
-    try {
-      const { oldName, name } = req.body;
-      const response = await Organization.getInstance().updateDefaultBranch(
-        oldName,
-        name
-      );
-      return res.json(response);
-    } catch (err) { }
-  }
+    public async addMonitorToGroup(idMonitor: String, ids: String[], bossType: String) {
+        return await Organization.getInstance().addMonitorToGroup(
+            idMonitor,
+            ids,
+            bossType
+        );
+    }
 
-  public async removeDefaultBranch(req: Request, res: Response) {
-    try {
-      const { name } = req.body;
-      const response = await Organization.getInstance().deleteDefaultBranch(
-        name
-      );
-      return res.json(response);
-    } catch (err) { }
-  }
+    public async removeMemberFromStructure(idMember: String, idGroup: String) {
+        return await Organization.getInstance().removeMemberFromStructure(
+            idMember,
+            idGroup
+        );
+    }
 
-  //Organización
-  public async updateOrganization(req: Request, res: Response) {
-    try {
-      const { idOrganization, newData } = req.body;
-      const response = await Organization.getInstance().updateOrganization(
-        idOrganization,
-        newData
-      );
-      return res.json(response);
-    } catch (err) { }
-  }
+    public async removeBossFromStructure(idMember: String, idBranch: String, idGroup: String) {
+        return await Organization.getInstance().removeBossFromStructure(
+            idMember,
+            idBranch,
+            idGroup
+        );
+    }
 
-  public async deleteOrganization(req: Request, res: Response) {
-    try {
-      const { idOrganization } = req.body;
-      const response = await Organization.getInstance().deleteOrganization(idOrganization);
-      return res.json(response);
-    } catch (err) { }
-  }
+    public async removeMonitorFromGroup(idMember: String, idBranch: String, idGroup: String) {
+        return await Organization.getInstance().removeMonitorFromGroup(
+            idMember,
+            idBranch,
+            idGroup
+        );
+    }
+
+    //CATALOGO
+    public async addDefaultBranch(idOrganization: String, name: String) {
+        return await Organization.getInstance().addDefaultBranch(
+            idOrganization,
+            name
+        );
+    }
+
+    public async updateDefaultBranch(oldName: String, name: String) {
+        return await Organization.getInstance().updateDefaultBranch(oldName, name);
+    }
+
+    public async removeDefaultBranch(name: String) {
+        return await Organization.getInstance().deleteDefaultBranch(name);
+    }
+
+    // Organización
+    public async updateOrganization(idOrganization: String, newData: String) {
+        return await Organization.getInstance().updateOrganization(
+            idOrganization,
+            newData
+        );
+    }
+
+    public async deleteOrganization(idOrganization: String) {
+        return await Organization.getInstance().deleteOrganization(idOrganization);
+    }
+
+    // from: idMember
+    public async sendCCG(from: String, body: String, type: String,) {
+        const ccg = new CCG(from, body, type);
+        return await Organization.getInstance().sendCCG(ccg, type);
+    }
+
+    public async enabledCCGs(idOrganization: String) {
+        return await Organization.getInstance().enabledCCGs(idOrganization);
+    }
+
+    // from: idMember, to: idStructure
+    public async sendNews(from: String, to: String, body: String, images: String[]) {
+        const news = new News(from, to, body, images);
+        await Organization.getInstance().sendNews(news);
+    }
+
+    public async seenNews(pIdMember: String, pSeenNews: String) {
+        await Organization.getInstance().seenNews(pIdMember, pSeenNews);
+    }
+
+    public async getAllCCGs(idOrganization: String){
+        return await Organization.getInstance().getAllCCGs(idOrganization);
+    }
+
+    async getPath(structureId: string) {
+        return await Organization.getInstance().getPath(structureId);
+    }
+
+    async getNews(structureId: string) {
+        return await Organization.getInstance().getNews(structureId);
+    }
+
+    async getSeenNews(idMember: string) {
+        return await Organization.getInstance().getSeenNews(idMember);
+    }
 }

@@ -1,17 +1,24 @@
+import { PROXY_AUTHENTICATION_REQUIRED } from "http-status";
 import { AbstractComponent } from "../Models/abstractComponent";
 import { CompositeStructure } from "../Models/structureComposite";
 import { DatabaseManager } from "./databaseManager";
+import { Proxy } from "./proxy";
+import { CCG } from "../models/CCG";
+import Publisher from "./publisher";
+import CCGSender from "./CCGSender";
+import GratitudeStrategy from "./GratitudeStrategy";
+import OfferingStrategy from "./OfferingStrategy";
+import PetitionStrategy from "./PetitionStrategy";
+import { News } from "../models/news";
+import NewsSubscriber from "./newsSubscriber";
 
 export class StructureManager {
-  //STRUCTURE MANAGER Attributes
-  structures: CompositeStructure[] = [];
-  databaseManager: DatabaseManager = new DatabaseManager();
 
   //El structure manager lleva el id de la organizacion para actualizar la info en memoria por cada llamada a base de datos
   // idOrganization: String = "";
 
   public getStructures() {
-    return this.structures;
+    return Proxy.getInstance().getStructures();
   }
 
   // public setIdOrganization(id: String) {
@@ -64,28 +71,45 @@ export class StructureManager {
     return null;
   }
 
+
+
   // BASE DE DATOS
   public async loadStructures(pParent: String) {
-    this.structures = await this.databaseManager.loadStructures(pParent, pParent);
+    const structures = await Proxy.getInstance().loadStructures(pParent);
+    this.publisher.clear();
+    this.loadListeners(structures);
+  }
+
+  private loadListeners(structures: CompositeStructure[]) {
+    for (const component of structures) {
+      const subscriber = new NewsSubscriber(component);
+      this.publisher.subscribe(component.id, subscriber);
+      this.loadListeners(component.getCompositeGroups());
+    }
   }
 
   public async create(...args: any[]) {
-    const message = await this.databaseManager.createStructure(args[0], args[1], args[2]);
-    return message;
+    return await Proxy.getInstance().createStructure(args);
   }
 
   public async update(...args: any[]) {
-    const message = this.databaseManager.updateStructure(args[0], args[1]);
-    return message;
+    return await Proxy.getInstance().updateStructure(args);
   }
 
   public async delete(...args: any[]) {
-    const message = this.databaseManager.deleteStructure(args[0]);
-    return message;
+    return await Proxy.getInstance().deleteStructure(args);
   }
 
   public async findLevel(...args: any[]) {
-    return this.databaseManager.findLevel(args[0]);
+    return Proxy.getInstance().findLevel(args);
+  }
+
+  public async getPath(...args: any[]) {
+    return await Proxy.getInstance().getPath(args[0]);
+  }
+
+  public async getNews(...args: any[]) {
+    return await Proxy.getInstance().getNews(args[0]);
   }
 
   //STRUCTURE MANAGER: MEMORIA
@@ -111,24 +135,22 @@ export class StructureManager {
   }
 
   public async addMemberToGroup(pIdMember: String, pIds: String[]) {
-    const pIdsBranch = pIds.slice(0, pIds.length - 1);
-    let branch = await this.getOneStructure(pIdsBranch);
-    let group: CompositeStructure = new CompositeStructure();
-    for (let index = 0; index < branch.groups.length; index++) {
-      group = branch.groups[index];
-      //Valida si ya es un miembro
+    const groups = await Proxy.getInstance().getStructureChildren(pIds[1]);
+
+    for (const group of groups) {
       if (this.findMember(pIdMember, group.members) != null) {
-        return { message: "This user is already a member in this structure" };
+        return { msg: 0 };
       }
     }
-    const message = await this.databaseManager.addMemberToGroup(pIdMember, group.id);
-    return message;
+
+    await Proxy.getInstance().addMemberToGroup(pIdMember, pIds[2]);
+    return { msg: 1 };
   }
 
   public async removeMemberFromStructure(pIdMember: String, pIdGroup: String) {
     let search = { members: pIdMember };
-    const message = this.databaseManager.removeToGroup(search, pIdGroup);
-    // this.loadStructures(this.idOrganization);
+    const message = Proxy.getInstance().removeFromGroup(search, pIdGroup);
+
     return message;
   }
 
@@ -139,14 +161,16 @@ export class StructureManager {
   ) {
     let searchB = { bosses: pIdMember };
     let searchM = { members: pIdMember };
-    const messageB = await this.databaseManager.removeToGroup(searchB, pIdGroup);
-    const messageM = await this.databaseManager.removeToGroup(searchM, pIdBranch);
+    const messageB = await Proxy.getInstance().removeFromGroup(searchB, pIdGroup);
+    const messageM = await Proxy.getInstance().removeFromGroup(searchM, pIdBranch);
     // await this.loadStructures(this.idOrganization);
     return messageM;
   }
 
-  public async addBossToGroup(pIdMember: String, pIds: String[]) {
-    let structure = await this.getOneStructure(pIds);
+  public async addBossToGroup(pIdMember: String, pIds: String[], pBossType: String) {
+    // let structure = await this.getOneStructure(pIds);
+    const structure = await Proxy.getInstance().getStructure(pIds[pIds.length - 1]);
+
     //Valida si ya es un jefe
     if (this.findMember(pIdMember, structure.bosses) != null) {
       return { message: "This member is already a boss for this structure" };
@@ -155,9 +179,11 @@ export class StructureManager {
     if (structure.bosses.length >= 2) {
       return { message: "Max of bosses is 2" };
     }
-    const message = this.databaseManager.addBossToGroup(
+
+    const message = Proxy.getInstance().addBossToGroup(
       pIdMember,
-      structure.id
+      structure.id,
+      pBossType
     );
     //this.loadStructures(this.idOrganization);
     return message;
@@ -165,17 +191,57 @@ export class StructureManager {
 
   public getStructuresXMember(
     pIdMember: String,
-    pStructures: CompositeStructure[]
+    pStructures: CompositeStructure[],
+    includeBosses: boolean
   ): CompositeStructure[] {
     let structures: CompositeStructure[] = [];
     if (pStructures != []) {
       for (let structure of pStructures) {
-        if (this.findMember(pIdMember, structure.members) != null) {
+        if (this.findMember(pIdMember, structure.members) != null || (includeBosses && this.findMember(pIdMember, structure.bosses)!= null)) {
           structures.push(structure);
         }
-        structures = structures.concat(this.getStructuresXMember(pIdMember, structure.groups));
+        structures = structures.concat(this.getStructuresXMember(pIdMember, structure.groups, includeBosses));
       }
     }
     return structures;
+  }
+
+  private publisher: Publisher = new Publisher();
+  private ccgSender: CCGSender = new CCGSender();
+
+  public async sendCCG(ccg: CCG, type: String) {
+    switch (type) {
+      case "Gratitude":
+        this.ccgSender.setStrategy(new GratitudeStrategy);
+        break;
+      case "Offering":
+        this.ccgSender.setStrategy(new OfferingStrategy);
+        break;
+      case "Petition":
+        this.ccgSender.setStrategy(new PetitionStrategy);
+        break;
+    }
+
+    await this.ccgSender.sendCCG(ccg);
+  }
+
+  // public async nabledCCGs(){
+  //   await Proxy.getInstance().enabledCCGs();
+  // }
+
+  public async sendNews(news: News) {
+    this.publisher.post(news);
+  }
+
+  public async seenNews(pIdMember: String, pSeenNews: String) {
+    await Proxy.getInstance().seenNews(pIdMember, pSeenNews);
+  }
+
+  public async getAllCCGs(idOrganization: String){
+    return await Proxy.getInstance().getAllCCGs(idOrganization);
+  }
+
+  async getSeenNews(idMember: string) {
+    return await Proxy.getInstance().getSeenNews(idMember);
   }
 }
