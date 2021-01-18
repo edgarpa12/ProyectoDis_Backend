@@ -75,9 +75,9 @@ export class StructureManager {
 
   // BASE DE DATOS
   public async loadStructures(pParent: String) {
-     const structures = await Proxy.getInstance().loadStructures(pParent);
-     this.publisher.clear();
-     this.loadListeners(structures);
+    const structures = await Proxy.getInstance().loadStructures(pParent);
+    this.publisher.clear();
+    this.loadListeners(structures);
   }
 
   private loadListeners(structures: CompositeStructure[]) {
@@ -159,9 +159,9 @@ export class StructureManager {
     return messageM;
   }
 
-  public async addBossToGroup(pIdMember: String, pIds: String[]) {
+  public async addBossToGroup(pIdMember: String, pIds: String[], pBossType: String) {
     // let structure = await this.getOneStructure(pIds);
-    const structure = await Proxy.getInstance().getStructure(pIds[2]);
+    const structure = await Proxy.getInstance().getStructure(pIds[pIds.length - 1]);
 
     //Valida si ya es un jefe
     if (this.findMember(pIdMember, structure.bosses) != null) {
@@ -174,7 +174,8 @@ export class StructureManager {
 
     const message = Proxy.getInstance().addBossToGroup(
       pIdMember,
-      structure.id
+      structure.id,
+      pBossType
     );
     //this.loadStructures(this.idOrganization);
     return message;

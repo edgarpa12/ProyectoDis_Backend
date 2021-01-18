@@ -355,13 +355,12 @@ export class Organization {
         );
     }
 
-    public addBossToGroup(pIdMember: String, pIds: String[]) {
-        return this.structureM.addBossToGroup(pIdMember, pIds);
+    public addBossToGroup(pIdMember: String, pIds: String[], pBossType: String) {
+        return this.structureM.addBossToGroup(pIdMember, pIds, pBossType);
     }
 
-    public async addMonitorToGroup(pIdMember: String, pIds: String[]) {
-        const added = await this.addBossToGroup(pIdMember, pIds);
-        return added;
+    public async addMonitorToGroup(pIdMember: String, pIds: String[], pBossType: String) {
+        return await this.addBossToGroup(pIdMember, pIds, pBossType);
     }
 
     public async getDefaultBranch() {
