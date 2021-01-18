@@ -62,9 +62,26 @@ export class FacadeMiembros {
 
   public async getStructuresXMember(req: Request, res: Response) {
     try {
-      const { idUser } = req.body;
+      const { idUser, includeBosses } = req.body;
       const response = await GeneralController.getInstance().getStructuresXMember(
-        idUser
+        idUser, includeBosses
+      );
+      return res.json(response);
+    } catch (err) {
+      return res.status(500).send({
+        success: false,
+        members: err.toString(),
+        data: null,
+      });
+    }
+  }
+
+  public async getPath(req: Request, res: Response) {
+    try {
+      const { structureId } = req.body;
+      console.log(req.body);
+      const response = await GeneralController.getInstance().getPath(
+        structureId
       );
       return res.json(response);
     } catch (err) {
@@ -115,6 +132,36 @@ export class FacadeMiembros {
       const { idMember, seenNews } = req.body;
       await GeneralController.getInstance().seenNews(idMember, seenNews);
       return res.json("La llama que llama");
+    } catch (err) {
+      return res.status(500).send({
+        success: false,
+        members: err.toString(),
+        data: null,
+      });
+    }
+  }
+
+  public async getSeenNews(req: Request, res: Response) {
+    try {
+      const { idMember } = req.body;
+      return res.json(
+        await GeneralController.getInstance().getSeenNews(idMember)
+      );
+    } catch (err) {
+      return res.status(500).send({
+        success: false,
+        members: err.toString(),
+        data: null,
+      });
+    }
+  }
+
+  public async getNews(req: Request, res: Response) {
+    try {
+      const { structureId } = req.body;
+      return res.json(
+        await GeneralController.getInstance().getNews(structureId)
+      );
     } catch (err) {
       return res.status(500).send({
         success: false,

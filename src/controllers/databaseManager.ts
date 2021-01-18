@@ -473,7 +473,7 @@ export class DatabaseManager {
     return { msg: 1 }
   }
 
-  async seenNews(pIdMember: String, pNews: [String]) {
+  async seenNews(pIdMember: String, pNews: String) {
     let searchedMember = newsHistoryS.find({ member: pIdMember });
     //Valida si no existe una estructura con ese nombre
     if ((await searchedMember).length == 0) {
@@ -514,5 +514,30 @@ export class DatabaseManager {
       }
     }
     return ccgs;
+  }
+
+  async getPath(structureId: any) {
+    let structure = await this.getStructure(structureId);
+    const path: any[] = [];
+    do {
+      path.push({id: structure._id, name: structure.name});
+      structure = await this.getStructure(structure.parent);
+    } while(structure);
+    return path.reverse();
+  }
+
+  async getNews(structureId: any) {
+    const news = await newsS.find({ to: structureId });
+    for (const news1 of news) {
+      news1.from = (await memberS.findById(news1.from)).name;
+    }
+    return news;
+  }
+
+  async getSeenNews(idMember: string) {
+    const seenNews = await newsHistoryS.find({member: idMember});
+    if (seenNews && seenNews.length > 0)
+      return seenNews[0].seenNews;
+    return [];
   }
 }

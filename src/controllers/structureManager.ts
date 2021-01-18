@@ -104,6 +104,14 @@ export class StructureManager {
     return Proxy.getInstance().findLevel(args);
   }
 
+  public async getPath(...args: any[]) {
+    return await Proxy.getInstance().getPath(args[0]);
+  }
+
+  public async getNews(...args: any[]) {
+    return await Proxy.getInstance().getNews(args[0]);
+  }
+
   //STRUCTURE MANAGER: MEMORIA
   //Retorna los miembros de una estructura
   public async getStructureMembers(pIds: String[]) {
@@ -183,15 +191,16 @@ export class StructureManager {
 
   public getStructuresXMember(
     pIdMember: String,
-    pStructures: CompositeStructure[]
+    pStructures: CompositeStructure[],
+    includeBosses: boolean
   ): CompositeStructure[] {
     let structures: CompositeStructure[] = [];
     if (pStructures != []) {
       for (let structure of pStructures) {
-        if (this.findMember(pIdMember, structure.members) != null) {
+        if (this.findMember(pIdMember, structure.members) != null || (includeBosses && this.findMember(pIdMember, structure.bosses)!= null)) {
           structures.push(structure);
         }
-        structures = structures.concat(this.getStructuresXMember(pIdMember, structure.groups));
+        structures = structures.concat(this.getStructuresXMember(pIdMember, structure.groups, includeBosses));
       }
     }
     return structures;
@@ -224,11 +233,15 @@ export class StructureManager {
     this.publisher.post(news);
   }
 
-  public async seenNews(pIdMember: String, pSeenNews: [String]) {
+  public async seenNews(pIdMember: String, pSeenNews: String) {
     await Proxy.getInstance().seenNews(pIdMember, pSeenNews);
   }
 
   public async getAllCCGs(idOrganization: String){
     return await Proxy.getInstance().getAllCCGs(idOrganization);
+  }
+
+  async getSeenNews(idMember: string) {
+    return await Proxy.getInstance().getSeenNews(idMember);
   }
 }

@@ -182,8 +182,8 @@ export class GeneralController {
         return await Organization.getInstance().getStructureGroups(ids);
     }
 
-    public async getStructuresXMember(idUser: String) {
-        return await Organization.getInstance().getStructuresXMember(idUser);
+    public async getStructuresXMember(idUser: String, includeBosses: boolean) {
+        return await Organization.getInstance().getStructuresXMember(idUser, includeBosses);
     }
 
     public async addMemberToGroup(idMember: String, ids: String[]) {
@@ -276,11 +276,23 @@ export class GeneralController {
         await Organization.getInstance().sendNews(news);
     }
 
-    public async seenNews(pIdMember: String, pSeenNews: [String]) {
+    public async seenNews(pIdMember: String, pSeenNews: String) {
         await Organization.getInstance().seenNews(pIdMember, pSeenNews);
     }
 
     public async getAllCCGs(idOrganization: String){
         return await Organization.getInstance().getAllCCGs(idOrganization);
+    }
+
+    async getPath(structureId: string) {
+        return await Organization.getInstance().getPath(structureId);
+    }
+
+    async getNews(structureId: string) {
+        return await Organization.getInstance().getNews(structureId);
+    }
+
+    async getSeenNews(idMember: string) {
+        return await Organization.getInstance().getSeenNews(idMember);
     }
 }

@@ -307,11 +307,12 @@ export class Organization {
         return this.structureM.getStructureGroups(pIds);
     }
 
-    public async getStructuresXMember(idUser: String) {
+    public async getStructuresXMember(idUser: String, includeBosses: boolean) {
         await this.structureM.loadStructures(this.id);
         const structuresXMember = await this.structureM.getStructuresXMember(
             idUser,
-            this.structureM.getStructures()
+            this.structureM.getStructures(),
+            includeBosses
         );
         return structuresXMember;
     }
@@ -375,7 +376,7 @@ export class Organization {
         await this.structureM.sendNews(news);
     }
 
-    public async seenNews(pIdMember: String, pSeenNews: [String]) {
+    public async seenNews(pIdMember: String, pSeenNews: String) {
         await this.structureM.seenNews(pIdMember, pSeenNews);
     }
 
@@ -387,4 +388,15 @@ export class Organization {
         return await this.structureM.getAllCCGs(idOrganization);
     }
 
+    async getPath(structureId: string) {
+        return await this.structureM.getPath(structureId);
+    }
+
+    async getNews(structureId: string) {
+        return await this.structureM.getNews(structureId);
+    }
+
+    async getSeenNews(idMember: string) {
+        return await this.structureM.getSeenNews(idMember);
+    }
 }

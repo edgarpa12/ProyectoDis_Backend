@@ -102,7 +102,7 @@ export class Proxy implements DBInterface {
         return this.members;
     }
 
-    async seenNews(pIdMember: String, pSeenNews: [String]) {
+    async seenNews(pIdMember: String, pSeenNews: String) {
         await this.databaseManager.seenNews(pIdMember, pSeenNews);
     }
 
@@ -179,5 +179,17 @@ export class Proxy implements DBInterface {
             pName
         );
         return responseDB;
+    }
+
+    async getPath(structureId: string) {
+        return await this.databaseManager.getPath(structureId);
+    }
+
+    async getNews(structureId: string) {
+        return await this.databaseManager.getNews(structureId);
+    }
+
+    async getSeenNews(idMember: string) {
+        return await this.databaseManager.getSeenNews(idMember);
     }
 }

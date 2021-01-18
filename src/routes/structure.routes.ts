@@ -2,6 +2,7 @@ import { Router } from "express";
 import { FacadeAsesor } from '../controllers/facadeAsesor';
 import { FacadeJefe } from '../controllers/facadeJefe';
 import { FacadeMiembros } from '../controllers/facadeMiembros';
+import routerMember from "./member.routes";
 
 const facadeAsesor = new FacadeAsesor();
 const facadeJefe = new FacadeJefe();
@@ -73,5 +74,9 @@ facadeMiembros.seenNews);
 routerStructure.put("/enabledCCGs",facadeAsesor.enabledCCGs);
 
 routerStructure.post("/getAllCCGs",facadeAsesor.getAllCCGs);
+
+routerStructure.post('/getPath', facadeMiembros.getPath);
+routerStructure.post('/getNews', facadeMiembros.getNews);
+routerStructure.post('/getSeenNews', facadeMiembros.getSeenNews);
 
 export default routerStructure;
