@@ -344,6 +344,16 @@ export class FacadeAsesor {
             console.error(err);
         }
     }
+
+    public async enabledCCGs(req: Request, res: Response){
+        const {idOrganization} = req.body;
+        try {
+            const response = await GeneralController.getInstance().enabledCCGs(idOrganization);
+            return res.json(response);
+        } catch (err) {
+            console.error(err);
+        }
+    }
 }
 
 // +changeGroup() / esta -

@@ -215,6 +215,10 @@ export class StructureManager {
     await this.ccgSender.sendCCG(ccg);
   }
 
+  // public async nabledCCGs(){
+  //   await Proxy.getInstance().enabledCCGs();
+  // }
+
   public async sendNews(news: News) {
     this.publisher.post(news);
   }

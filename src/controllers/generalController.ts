@@ -264,6 +264,10 @@ export class GeneralController {
         return await Organization.getInstance().sendCCG(ccg, type);
     }
 
+    public async enabledCCGs(idOrganization: String){
+        return await Organization.getInstance().enabledCCGs(idOrganization);
+    }
+
     // from: idMember, to: idStructure
     public async sendNews(from: String, to: String, body: String, images: String[]) {
         const news = new News(from, to, body, images);

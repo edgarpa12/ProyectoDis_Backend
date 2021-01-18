@@ -489,4 +489,8 @@ export class DatabaseManager {
       return { msg: 1 }
     }
   }
+
+  async enabledCCGs(idOrganization: String, enabled: Boolean){
+    return ccgS.findByIdAndUpdate(idOrganization, enabled);
+  }
 }

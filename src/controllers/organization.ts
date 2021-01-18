@@ -377,5 +377,8 @@ export class Organization {
         await this.structureM.seenNews(pIdMember, pSeenNews);
     }
 
+    public async enabledCCGs(idOrganization: String){
+        await this.proxy.enabledCCGs(idOrganization);
+    }
 
 }
