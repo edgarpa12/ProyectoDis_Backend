@@ -114,16 +114,15 @@ export class StructureManager {
   }
 
   public async addMemberToGroup(pIdMember: String, pIds: String[]) {
-    const pIdsBranch = pIds.slice(0, pIds.length - 1);
-    let branch = await this.getOneStructure(pIdsBranch);
-    let group: CompositeStructure = new CompositeStructure();
-    for (let index = 0; index < branch.groups.length; index++) {
-      group = branch.groups[index];
+    const groups = await Proxy.getInstance().getStructureChildren(pIds[1]);
+
+    for (const group of groups) {
       if (this.findMember(pIdMember, group.members) != null) {
         return { msg: 0 };
       }
     }
-    await Proxy.getInstance().addMemberToGroup(pIdMember, group.id);
+
+    await Proxy.getInstance().addMemberToGroup(pIdMember, pIds[2]);
     return { msg: 1 };
   }
 

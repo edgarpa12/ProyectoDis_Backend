@@ -188,8 +188,12 @@ export class DatabaseManager {
 
   //DB MANAGER: OBTIENE una structure en la  base de datos
   async getStructure(pId: String) {
-    let persistantStructure = await structureS.findById(pId);
-    return persistantStructure;
+    return await structureS.findById(pId);
+  }
+
+  // DB MANAGER: Obtiene todos los hijos de una estructura
+  async getStructureChildren(pIdParent: String) {
+    return await structureS.find({ "parent": pIdParent });
   }
 
   //DB MANAGER: OBTIENE una structure en la  base de datos
@@ -453,7 +457,7 @@ export class DatabaseManager {
       type: pCcg.type,
     });
     await persistantCCG.save();
-    return {msg:1}
+    return { msg: 1 }
   }
 
   async saveNews(pNews: News, component: AbstractComponent) {
@@ -464,7 +468,7 @@ export class DatabaseManager {
       images: pNews.images,
     });
     await persistantNews.save();
-    return {msg:1}
+    return { msg: 1 }
   }
 
   async seenNews(pIdMember: String, pNews: [String]) {
@@ -476,13 +480,13 @@ export class DatabaseManager {
         seenNews: pNews,
       });
       await persistantNewsHistory.save();
-      return {msg:1}
+      return { msg: 1 }
     } else {
       await newsHistoryS.updateOne(
         { member: pIdMember },
         { $push: { seenNews: pNews } }
       );
-      return {msg:1}
+      return { msg: 1 }
     }
   }
 }
