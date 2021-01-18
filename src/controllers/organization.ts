@@ -253,7 +253,7 @@ export class Organization {
         const organization = response[0];
 
         if (organization !== "0") {
-            this.loadData(organization);
+            await this.loadData(organization);
             return response;
         } else {
             return 0;
@@ -273,7 +273,7 @@ export class Organization {
         return "Tudo Bem";
     }
 
-    public loadData(data: (String | String[][])) {
+    public async loadData(data: (String | String[][])) {
         this.id = data[0] as String;
         this.name = data[1] as String;
         this.legalCertificate = data[2] as String;
@@ -284,6 +284,7 @@ export class Organization {
         this.country = data[7] as String;
         this.email = data[8] as String;
         this.branches = data[9] as String[];
+        await this.structureM.loadStructures(this.id);
         console.log("Organizacion: ", this.name);
     }
 

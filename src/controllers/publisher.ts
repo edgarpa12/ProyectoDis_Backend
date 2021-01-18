@@ -5,7 +5,7 @@ import { AbstractComponent } from "../models/abstractComponent";
 export default class Publisher {
   private subscribers: Map<String, Subscriber> = new Map<String, Subscriber>();
 
-  public subscribe(subscriber: Subscriber, component: String): void {
+  public subscribe(component: String, subscriber: Subscriber): void {
     this.subscribers.set(component, subscriber);
   }
 
@@ -13,7 +13,13 @@ export default class Publisher {
     this.subscribers.delete(component);
   }
 
+  public clear() {
+    this.subscribers.clear();
+  }
+
   public post(news: News) {
+    console.log("Notifying: ", news);
+    console.log(this.subscribers);
     this.subscribers.get(news.to)?.notify(news);
   }
 }

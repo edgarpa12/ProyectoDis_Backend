@@ -38,6 +38,7 @@ export class Proxy implements DBInterface {
 
     public async loadStructures(pParent: String) {
         this.structures = await this.databaseManager.loadStructures(pParent, pParent);
+        return this.structures;
     }
 
     public async createStructure(...args: any[]) {

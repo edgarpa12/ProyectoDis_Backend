@@ -51,6 +51,10 @@ export class CompositeStructure extends AbstractComponent {
     return groups;
   }
 
+  public getCompositeGroups() {
+    return this.groups;
+  }
+
   public getBosses(): AbstractComponent[] {
     let bosses: AbstractComponent[] = [];
     for (let i = 0; i < this.bosses.length; i++) {

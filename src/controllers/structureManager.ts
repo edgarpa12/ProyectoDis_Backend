@@ -10,6 +10,7 @@ import GratitudeStrategy from "./GratitudeStrategy";
 import OfferingStrategy from "./OfferingStrategy";
 import PetitionStrategy from "./PetitionStrategy";
 import { News } from "../models/news";
+import NewsSubscriber from "./newsSubscriber";
 
 export class StructureManager {
 
@@ -70,9 +71,21 @@ export class StructureManager {
     return null;
   }
 
+
+
   // BASE DE DATOS
   public async loadStructures(pParent: String) {
-    return await Proxy.getInstance().loadStructures(pParent);
+     const structures = await Proxy.getInstance().loadStructures(pParent);
+     this.publisher.clear();
+     this.loadListeners(structures);
+  }
+
+  private loadListeners(structures: CompositeStructure[]) {
+    for (const component of structures) {
+      const subscriber = new NewsSubscriber(component);
+      this.publisher.subscribe(component.id, subscriber);
+      this.loadListeners(component.getCompositeGroups());
+    }
   }
 
   public async create(...args: any[]) {

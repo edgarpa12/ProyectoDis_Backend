@@ -92,10 +92,10 @@ export class FacadeMiembros {
 
   public async sendNews(req: Request, res: Response) {
     try {
-      const { from, to, body } = req.body;
       const images = await saveImages(req, res);
-      console.log(images);
-      console.log(from, to, body, req.body);
+      const from = JSON.parse(req.body.from);
+      const to = JSON.parse(req.body.to);
+      const body = JSON.parse(req.body.body);
       await GeneralController.getInstance().sendNews(from, to, body, images);
       return res.json("La llama que llama");
       // const { from, to, body, images } = req.body;

@@ -463,7 +463,7 @@ export class DatabaseManager {
   async saveNews(pNews: News, component: AbstractComponent) {
     const persistantNews = new newsS({
       from: pNews.from,
-      to: component,
+      to: component.id,
       body: pNews.body,
       images: pNews.images,
     });

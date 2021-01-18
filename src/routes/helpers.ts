@@ -32,7 +32,6 @@ export async function saveImages(req: Request, res: Response): Promise<String[]>
         reject('Please select an image to upload');
       else if (err)
         reject(err);
-      console.log(req.files);
       // @ts-ignore
       resolve(req.files.map((f) => f.filename));
     }
